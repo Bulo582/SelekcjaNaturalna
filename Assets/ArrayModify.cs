@@ -6,6 +6,12 @@ using static MapGenerator;
 
 public class ArrayModify 
 {
+
+    public static string TypeField(char[,] array, int x, int z)
+    {
+        return array[x, z].ToString();
+    }
+
     public static void CircleChechout(ref char[,] array, int mX, int mY, int r, char region)
     {
         if (array is null)

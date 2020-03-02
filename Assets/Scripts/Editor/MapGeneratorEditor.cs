@@ -29,7 +29,8 @@ public class MapGeneratorEditor : Editor
                 var generator = GameObject.Find("MapGenerator");
                 generator.GetComponent<MapGenerator>().DrawMapInEditor();
             }
-            ArrayToTxt.ReadMapArray2D(Spawner.Instance.GenerateMap);
+            //ArrayToTxt.ReadMapArray2D(Spawner.Instance.GenerateMap);
+            Debug.Log(ArrayModify.TypeField(Spawner.Instance.GenerateMap, 0, 4));
         }
     }
 }

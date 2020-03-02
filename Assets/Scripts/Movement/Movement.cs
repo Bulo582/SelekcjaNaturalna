@@ -11,11 +11,21 @@ public class Movement : MonoBehaviour
     public Vector3 actualPosition;
     bool animationWork;
 
+    public char[,] accesArea = new char[3, 3];
+
+    int halfWidthMap;
+    int halfHeightMap;
     void Start()
     {
         actualPosition = this.gameObject.transform.position;
         animationWork = false;
         movementSpeed = StartRabbit.Manager.movementSpeed;
+
+        halfHeightMap = Spawner.Instance.HalfHeightMap;
+        halfWidthMap = Spawner.Instance.HalfWidthMap;
+        
+
+        Debug.Log(halfWidthMap);
         StartCoroutine("MoveTime", animationTime);
     }
 

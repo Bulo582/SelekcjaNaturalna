@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -18,7 +19,7 @@ public class SpawnEditor : Editor
 
         if (GUILayout.Button("Generate"))
         {
-            ArrayToTxt.Do = false;
+            ArrayToTxt.Do = true;
             if (MeshGenerator.HeightMap == null)
             {
                 var generator = GameObject.Find("MapGenerator");
@@ -33,11 +34,29 @@ public class SpawnEditor : Editor
         }
         if (GUILayout.Button("Clear"))
         {
-            Spawner.Instance.DeleteCarrots();
-            Spawner.Instance.DeleteCarrotsSpawn();
-            Spawner.Instance.DeleteFoxes();
-            Spawner.Instance.DeleteRabbits();
-            Spawner.Instance.DeleteTree();
+            try
+            {
+                Spawner.Instance.DeleteCarrotsSpawn();
+                Spawner.Instance.DeleteCarrots();
+                Spawner.Instance.DeleteFoxes();
+                Spawner.Instance.DeleteRabbits();
+                Spawner.Instance.DeleteTree();
+            }
+            catch(NullReferenceException)
+            {
+                ArrayToTxt.Do = false;
+                if (MeshGenerator.HeightMap == null)
+                {
+                    var generator = GameObject.Find("MapGenerator");
+                    generator.GetComponent<MapGenerator>().DrawMapInEditor();
+                }
+                Spawner.InstanceCreator(MeshGenerator.HeightMap, MapGenerator.MapHeight, MapGenerator.MapWidth, MapGenerator.Regions);
+                Spawner.Instance.DeleteCarrotsSpawn();
+                Spawner.Instance.DeleteCarrots();
+                Spawner.Instance.DeleteFoxes();
+                Spawner.Instance.DeleteRabbits();
+                Spawner.Instance.DeleteTree();
+            }
         }
     }
 }

@@ -49,6 +49,15 @@ public class Spawner : MonoBehaviour
         }
     }
 
+    public int HalfWidthMap
+    {
+        get { return halfWidthMap; }
+    }
+    public int HalfHeightMap 
+    { 
+        get { return halfHeightMap; }
+    }
+
     public Spawner(float[,] noiseMap, int heightMap, int widthMap, TerrainType[] regions)
     {
         this.halfWidthMap = (widthMap - 2) / -2;
@@ -108,6 +117,7 @@ public class Spawner : MonoBehaviour
     }
     public void SpawnCarrots(int count)
     {
+        DeleteCarrotsSpawn();
         DeleteCarrots();
         int range;
         int generated = 0;
@@ -271,7 +281,6 @@ public class Spawner : MonoBehaviour
     {
         //Debug.Log("DeleteCarrots");
         var gameObjects = GameObject.FindGameObjectsWithTag("Carrot");
-
         for (var i = 0; i < gameObjects.Length; i++)
         {
             DestroyImmediate(gameObjects[i]);

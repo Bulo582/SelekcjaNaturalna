@@ -6,10 +6,58 @@ using static MapGenerator;
 
 public class ArrayModify 
 {
-
     public static string TypeField(char[,] array, int x, int z)
     {
         return array[x, z].ToString();
+    }
+
+    public static char[,] CircleOut(char[,] array, int mX, int mY, int r)
+    {
+        if (array is null)
+            throw new Exception("CircleCheckout NullReference Exception");
+        if ((mX > array.GetLength(1) && mX < 0) || (mY > array.GetLength(0) || mY < 0))
+            throw new Exception("Mid point has coordinate incorrect");
+
+        char[,] result = new char[r + 2, r + 2];
+        int arrayX = array.GetLength(1);
+        int arrayY = array.GetLength(0);
+
+        int dX = 0 - r + mX;
+        int dY = 0 - r + mY;
+
+        int x;
+        int y;
+
+        int a = 0;
+        int b = 0;
+        for (int i = 0; i < array.GetLength(0); i++)
+        {
+            for (int j = 0; j < array.GetLength(1); j++)
+            {
+                x = j - r;
+                y = i - r;
+                if ((x * x + y * y) <= r * r + 1)
+                {
+                    try
+                    {
+                        if (a == result.GetLength(0))
+                        {
+                            a = 0;
+                            b++;
+                        }
+                        result[a, b] = array[i + dY, j + dX];
+                        a++;
+                        if (b == result.GetLength(1))
+                            break;
+                    }
+                    catch (IndexOutOfRangeException)
+                    {
+                        continue;
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     public static void CircleChechout(ref char[,] array, int mX, int mY, int r, char region)

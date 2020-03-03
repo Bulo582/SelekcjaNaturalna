@@ -29,8 +29,18 @@ public class MapGeneratorEditor : Editor
                 var generator = GameObject.Find("MapGenerator");
                 generator.GetComponent<MapGenerator>().DrawMapInEditor();
             }
-            //ArrayToTxt.ReadMapArray2D(Spawner.Instance.GenerateMap);
-            Debug.Log(ArrayModify.TypeField(Spawner.Instance.GenerateMap, 0, 4));
+            try
+            {
+                if (Spawner.Instance.GenerateMap != null)
+                {
+                    Debug.Log(ArrayModify.TypeField(Spawner.Instance.GenerateMap, 0, 4));
+                    ArrayToTxt.ReadMapArray2D(Spawner.Instance.GenerateMap);
+                }
+            }
+            catch (NullReferenceException)
+            {
+                Debug.LogError("Generate population first!");
+            }
         }
     }
 }

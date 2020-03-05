@@ -82,6 +82,7 @@ public class Movement : MonoBehaviour
     {
         ChooseWay(accesArea);
         DirToArrayPoz();
+        accesArea = ArrayModify.CircleOut(Spawner.Instance.GenerateMap, arrayPozZ, arrayPozX, 2);
     }
     /// <summary>
     /// Atrer take way 
@@ -165,23 +166,27 @@ public class Movement : MonoBehaviour
             if (inx == 0)
             {
                 dirMove.move = DirToVect3(Direction.down);
+                MoveObject(dirMove.move);
                 dirMove.dir = Direction.down;
                 TurnObject(dirMove.dir);
             }
             else if (inx == 1)
             {
                 dirMove.move = DirToVect3(Direction.right);
+                MoveObject(dirMove.move);
                 dirMove.dir = Direction.right;
             }
             else if (inx == 2)
             {
                 dirMove.move = DirToVect3(Direction.up);
+                MoveObject(dirMove.move);
                 dirMove.dir = Direction.up;
                 TurnObject(dirMove.dir);
             }
             else
             {
                 dirMove.move = DirToVect3(Direction.left);
+                MoveObject(dirMove.move);
                 dirMove.dir = Direction.left;
                 TurnObject(dirMove.dir);
             }
@@ -209,23 +214,27 @@ public class Movement : MonoBehaviour
             if (inx == 0)
             {
                 dirMove.move = DirToVect3(Direction.left);
+                MoveObject(dirMove.move);
                 dirMove.dir = Direction.left;
                 TurnObject(dirMove.dir);
             }
             else if (inx == 1)
             {
                 dirMove.move = DirToVect3(Direction.down);
+                MoveObject(dirMove.move);
                 dirMove.dir = Direction.down;
             }
             else if (inx == 2)
             {
                 dirMove.move = DirToVect3(Direction.right);
+                MoveObject(dirMove.move);
                 dirMove.dir = Direction.right;
                 TurnObject(dirMove.dir);
             }
             else
             {
                 dirMove.move = DirToVect3(Direction.up);
+                MoveObject(dirMove.move);
                 dirMove.dir = Direction.up;
                 TurnObject(dirMove.dir);
             }
@@ -254,23 +263,27 @@ public class Movement : MonoBehaviour
             if (inx == 0)
             {
                 dirMove.move = DirToVect3(Direction.left);
+                MoveObject(dirMove.move);
                 dirMove.dir = Direction.left;
                 TurnObject(dirMove.dir);
             }
             else if (inx == 1)
             {
                 dirMove.move = DirToVect3(Direction.up);
+                MoveObject(dirMove.move);
                 dirMove.dir = Direction.up;
             }
             else if (inx == 2)
             {
                 dirMove.move = DirToVect3(Direction.right);
+                MoveObject(dirMove.move);
                 dirMove.dir = Direction.right;
                 TurnObject(dirMove.dir);
             }
             else
             {
                 dirMove.move = DirToVect3(Direction.down);
+                MoveObject(dirMove.move);
                 dirMove.dir = Direction.down;
                 TurnObject(dirMove.dir);
             }
@@ -298,23 +311,27 @@ public class Movement : MonoBehaviour
             if (inx == 0)
             {
                 dirMove.move = DirToVect3(Direction.down);
+                MoveObject(dirMove.move);
                 dirMove.dir = Direction.down;
                 TurnObject(dirMove.dir);
             }
             else if (inx == 1)
             {
                 dirMove.move = DirToVect3(Direction.left);
+                MoveObject(dirMove.move);
                 dirMove.dir = Direction.left;
             }
             else if (inx == 2)
             {
                 dirMove.move = DirToVect3(Direction.up);
+                MoveObject(dirMove.move);
                 dirMove.dir = Direction.up;
                 TurnObject(dirMove.dir);
             }
             else
             {
                 dirMove.move = DirToVect3(Direction.right);
+                MoveObject(dirMove.move);
                 dirMove.dir = Direction.right;
                 TurnObject(dirMove.dir);
             }
@@ -331,6 +348,10 @@ public class Movement : MonoBehaviour
             this.gameObject.transform.rotation = Quaternion.Euler(0, 90, 0);
         else if (dir == Direction.left)
             this.gameObject.transform.rotation = Quaternion.Euler(0, -180, 0);
+    }
+    public void MoveObject(Vector3 subPosition)
+    {
+        this.gameObject.transform.Translate(subPosition);
     }
     public struct DirMove
     {

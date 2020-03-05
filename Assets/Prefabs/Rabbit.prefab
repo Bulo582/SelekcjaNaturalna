@@ -537,6 +537,8 @@ MonoBehaviour:
   movementSpeed: 0
   movementCooldown: 0
   actualPosition: {x: 0, y: 0, z: 0}
+  arrayPozX: 0
+  arrayPozZ: 0
 --- !u!1 &6014252239765151316
 GameObject:
   m_ObjectHideFlags: 0

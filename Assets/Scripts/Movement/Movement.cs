@@ -14,9 +14,10 @@ public enum Direction
 
 public class Movement : MonoBehaviour
 {
+    public int iteration = 0;
     float animationTime = 2f;
     float globalMovementIncrease = 0.5f;
-    public float movementSpeed;
+    public readonly float movementSpeed = 0.2f;
     public float movementCooldown = 0;
     public Vector3 actualPosition;
     bool animationWork;
@@ -30,33 +31,44 @@ public class Movement : MonoBehaviour
 
     DirMove dirMove;
 
-    private char[] blockableChar = { 'X', 'T', 'C', 'R'};
+    private char[] blockableChar = { 'X', 'T', 'C', 'R','O'};
     void Start()
     {
         actualPosition = this.gameObject.transform.position;
         animationWork = false;
-        movementSpeed = StartRabbit.Manager.movementSpeed;
 
         halfHeightMap = Spawner.Instance.HalfHeightMap;
         halfWidthMap = Spawner.Instance.HalfWidthMap;
          
-        arrayPozX = Convert.ToInt16(actualPosition.x ) + halfHeightMap;
+        arrayPozX = Convert.ToInt16(actualPosition.x) + halfHeightMap;
         arrayPozZ = Convert.ToInt16(actualPosition.z) - halfWidthMap;
 
-        accesArea = ArrayModify.CircleOut(Spawner.Instance.GenerateMap, arrayPozZ, arrayPozX, 2); //tip! reverse argument x/z
+        accesArea = ArrayModify.CircleOut(Spawner.Instance.GenerateMap, arrayPozZ, arrayPozX, 1); //tip! reverse argument x/z
 
         dirMove = new DirMove(Direction.right);
+        ArrayToTxt.ReadMapArray2D(Spawner.Instance.GenerateMap);
+        Debug.Log($"Res {iteration}\n" +
+    $"{OldLog()}");
+        ArrayToTxt.ThrowLogToFile(iteration.ToString(), OldLog());
     }
 
-    public void OldLog()
+    public string OldLog()
     {
-        foreach (var item in accesArea)
+        string log = "";
+        for (int i = 0; i < accesArea.GetLength(0); i++)
         {
-            Debug.Log(item.ToString());
+            for (int j = 0; j < accesArea.GetLength(0); j++)
+            {
+                log += accesArea[i,j].ToString();
+            }
+            log += "\n";
         }
-        Debug.Log($"X = {arrayPozX} Z = {arrayPozZ}");
-        Debug.Log($"What is on postion = {ArrayModify.TypeField(Spawner.Instance.GenerateMap, arrayPozX, arrayPozZ)}");
-        StartCoroutine("MoveTime", animationTime);
+
+        log += $"Dir = {dirMove.dir.ToString()}\n";
+        log += $"X = {arrayPozX} Z = {arrayPozZ}\n";
+        log += $"What is on postion = {ArrayModify.TypeField(Spawner.Instance.GenerateMap, arrayPozX, arrayPozZ)}\n";
+        log += $"Real position = {transform.position.x}, {transform.position.z}";
+        return log;
     }
 
     void Update()
@@ -74,15 +86,20 @@ public class Movement : MonoBehaviour
         movementCooldown = 0;
         animationWork = true;
         RandomMove();
+        iteration++;
+        Debug.Log($"Jump {iteration}\n" +
+            $"{OldLog()}");
+        ArrayToTxt.ReadMapArray2D(Spawner.Instance.GenerateMap,iteration.ToString());
+        ArrayToTxt.ThrowLogToFile(iteration.ToString(), OldLog());
         yield return new WaitForSeconds(animationTime);
-        Debug.Log("Jump");
+
         animationWork = false;
     }
     public void RandomMove()
     {
         ChooseWay(accesArea);
         DirToArrayPoz();
-        accesArea = ArrayModify.CircleOut(Spawner.Instance.GenerateMap, arrayPozZ, arrayPozX, 2);
+        accesArea = ArrayModify.CircleOut(Spawner.Instance.GenerateMap, arrayPozZ, arrayPozX, 1);
     }
     /// <summary>
     /// Atrer take way 
@@ -93,13 +110,13 @@ public class Movement : MonoBehaviour
         if (dirMove.dir == Direction.up)
         {
             Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = '4';
-            arrayPozX++;
+            arrayPozX--;
             Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = 'R';
         }
         else if (dirMove.dir == Direction.down)
         {
             Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = '4';
-            arrayPozX--;
+            arrayPozX++;
             Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = 'R';
         }
         else if (dirMove.dir == Direction.right)
@@ -144,9 +161,10 @@ public class Movement : MonoBehaviour
     }
     public void ChooseWay(char[,] accesArea)
     {
+        // RIGHT 
         if (dirMove.dir == Direction.right)
         {
-            if (Array.Exists(blockableChar, x => x == accesArea[0, 1]))
+            if (Array.Exists(blockableChar, element => element == accesArea[2, 1]))
                 dirMove.pos[0] = false;
             else
                 dirMove.pos[0] = true;
@@ -156,7 +174,7 @@ public class Movement : MonoBehaviour
             else
                 dirMove.pos[1] = true;
 
-            if (Array.Exists(blockableChar, x => x == accesArea[2, 1]))
+            if (Array.Exists(blockableChar, x => x == accesArea[0, 1]))
                 dirMove.pos[2] = false;
             else
                 dirMove.pos[2] = true;
@@ -192,6 +210,7 @@ public class Movement : MonoBehaviour
             }
 
         }
+        // DOWN 
         else if (dirMove.dir == Direction.down)
         {
             if (Array.Exists(blockableChar, x => x == accesArea[1, 0]))
@@ -241,6 +260,7 @@ public class Movement : MonoBehaviour
 
 
         }
+        //UP
         else if (dirMove.dir == Direction.up)
         {
             if (Array.Exists(blockableChar, x => x == accesArea[1, 0]))
@@ -248,7 +268,7 @@ public class Movement : MonoBehaviour
             else
                 dirMove.pos[0] = true;
 
-            if (Array.Exists(blockableChar, x => x == accesArea[1, 1]))
+            if (Array.Exists(blockableChar, x => x == accesArea[0, 1]))
                 dirMove.pos[1] = false;
             else
                 dirMove.pos[1] = true;
@@ -289,6 +309,7 @@ public class Movement : MonoBehaviour
             }
 
         }
+        //LEFT
         else if (dirMove.dir == Direction.left)
         {
             if (Array.Exists(blockableChar, x => x == accesArea[2, 1]))
@@ -301,7 +322,7 @@ public class Movement : MonoBehaviour
             else
                 dirMove.pos[1] = true;
 
-            if (Array.Exists(blockableChar, x => x == accesArea[1, 1]))
+            if (Array.Exists(blockableChar, x => x == accesArea[0, 1]))
                 dirMove.pos[2] = false;
             else
                 dirMove.pos[2] = true;

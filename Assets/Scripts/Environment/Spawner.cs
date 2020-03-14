@@ -71,7 +71,18 @@ public class Spawner : MonoBehaviour
         foxPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/Fox.prefab", typeof(GameObject));
         treePrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/Tree.prefab", typeof(GameObject));
     }
+    #region Spawns
+    public void TestSpawn()
+    {
+        GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap +1, 0.3f, 0 - halfHeightMap), Quaternion.identity) as GameObject;
+        rabbit.name = "Rabbit" + rabbitIndex;
+        rabbit.transform.parent = GameObject.Find("Rabbits").transform;
+        generateMap[1, 0] = 'R';
 
+        GameObject carriot = Instantiate(carrotPrefab, new Vector3(halfWidthMap + 2, 0.2f, 0 - halfHeightMap), Quaternion.identity) as GameObject;
+        carriot.transform.parent = GameObject.Find("Carrots").transform;
+        generateMap[2, 0] = 'C';
+    }
     public void SpawnRabbits(int count)
     {
         DeleteRabbits();
@@ -246,6 +257,8 @@ public class Spawner : MonoBehaviour
                 break;
         }
     }
+    #endregion
+    #region Deletes
 
     public void DeleteFoxes()
     {
@@ -297,5 +310,5 @@ public class Spawner : MonoBehaviour
         }
     }
 
-
+    #endregion
 }

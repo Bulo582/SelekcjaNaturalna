@@ -8,8 +8,19 @@ using static MapGenerator;
 
 public class ArrayToTxt 
 {
-    static string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+    static string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+    static string path = Path.Combine(desktop, "TestLand");
     public static bool Do = true;
+
+    public static void ThrowLogToFile(string alias, string log)
+    {
+        string filePath = Path.Combine(path, $"Log{alias}.txt");
+        using (StreamWriter sw = new StreamWriter(filePath))
+        {
+            sw.WriteLine(log);
+        }
+    }
+
     public static float[,] LoadHeightFromFile(string filename)
     {
         float[,] array = null;

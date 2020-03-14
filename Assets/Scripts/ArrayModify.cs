@@ -6,6 +6,7 @@ using static MapGenerator;
 
 public class ArrayModify 
 {
+    /// return char on coordinate position
     public static string TypeField(char[,] array, int x, int z)
     {
         return array[x, z].ToString();
@@ -30,37 +31,40 @@ public class ArrayModify
 
         int a = 0;
         int b = 0;
-        for (int i = 0; i < array.GetLength(0); i++)
-        {
-            for (int j = 0; j < array.GetLength(1); j++)
+            for (int i = 0; i < array.GetLength(0); i++)
             {
-                x = j - r;
-                y = i - r;
-                if ((x * x + y * y) <= r * r + 1)
+                for (int j = 0; j < array.GetLength(1); j++)
                 {
-                    try
+                    x = j - r;
+                    y = i - r;
+                    if ((x * x + y * y) <= r * r + 1)
                     {
-                        if (a == result.GetLength(0))
+                        try
                         {
-                            a = 0;
-                            b++;
+                            if (a==result.GetLength(0))
+                            {
+                                a = 0;
+                                b++;
+                            }
+                            result[b, a] = array[i + dY, j + dX];
+                            a++;
+                            if (b == result.GetLength(0))
+                                break;
                         }
-                        result[a, b] = array[i + dY, j + dX];
-                        a++;
-                        if (b == result.GetLength(1))
-                            break;
-                    }
-                    catch (IndexOutOfRangeException)
-                    {
-                        continue;
+                        catch (IndexOutOfRangeException)
+                        {
+                            result[b, a] = 'O';
+                            a++;
+                            continue;
+                        }
                     }
                 }
             }
-        }
+
         return result;
     }
 
-    public static void CircleChechout(ref char[,] array, int mX, int mY, int r, char region)
+    public static void CircleReplaceRegion(ref char[,] array, int mX, int mY, int r, char region)
     {
         if (array is null)
             throw new Exception("CircleCheckout NullReference Exception");

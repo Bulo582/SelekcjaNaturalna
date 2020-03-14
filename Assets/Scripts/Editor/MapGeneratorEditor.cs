@@ -33,7 +33,6 @@ public class MapGeneratorEditor : Editor
             {
                 if (Spawner.Instance.GenerateMap != null)
                 {
-                    Debug.Log(ArrayModify.TypeField(Spawner.Instance.GenerateMap, 0, 4));
                     ArrayToTxt.ReadMapArray2D(Spawner.Instance.GenerateMap);
                 }
             }

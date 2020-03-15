@@ -173,7 +173,7 @@ public class ArrayModify
     public static char[,] GenerateArray(float[,] heightMap, TerrainType[] regions)
     {
 
-        char[,] generateMap = new char[heightMap.GetLength(0), heightMap.GetLength(1)];
+        char[,] generateMap = new char[heightMap.GetLength(0)-1, heightMap.GetLength(1)-1];
         heightMap = ArrayReverseY(heightMap);
         heightMap = ArrayCutXY(heightMap);
         heightMap = ArrayReverseX(heightMap);

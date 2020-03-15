@@ -490,16 +490,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ba35f4186a61fc489c1738b63f9b2e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  reproductionRange: 0
-  reproductionAge: 0
-  age: 0
-  limitAge: 0
   movementSpeed: 0
   rangeOfView: 0
   hunger: 0
-  thrist: 0
-  strength: 0
-  setSex: 0
 --- !u!114 &2863516664257646603
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -514,14 +507,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: 
   currentHunger: 0
-  hungerIncrease: 0.5
-  currentThrist: 0
-  thristIncrease: 2
-  currentReproCapacity: 0
-  reproductionCapacityIncrease: 1
-  currentStrength: 0
-  strengthIncrease: 2
-  currentAge: 0
 --- !u!114 &1200074001377983023
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -534,7 +519,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9328d0c25e28574d911eb50651d2a6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movementSpeed: 0
+  iteration: 0
   movementCooldown: 0
   actualPosition: {x: 0, y: 0, z: 0}
   arrayPozX: 0

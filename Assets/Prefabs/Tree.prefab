@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7613343400750529690}
+  - component: {fileID: 4718165575234602203}
   m_Layer: 11
   m_Name: Tree
   m_TagString: Tree
@@ -31,6 +32,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &4718165575234602203
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2281382267830992672}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.19540933, y: 0.19999999, z: 0.22347295}
+  m_Center: {x: 0.0022953302, y: 0.099999994, z: -0.011736482}
 --- !u!1001 &4796259967560212898
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -68,7 +82,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400010, guid: 7509e358a46da7a4c9a9600a92cf5807, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.08511104
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400010, guid: 7509e358a46da7a4c9a9600a92cf5807, type: 3}
       propertyPath: m_LocalPosition.y
@@ -76,7 +90,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400010, guid: 7509e358a46da7a4c9a9600a92cf5807, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.04859391
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400010, guid: 7509e358a46da7a4c9a9600a92cf5807, type: 3}
       propertyPath: m_LocalRotation.x

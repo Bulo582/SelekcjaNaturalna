@@ -193,7 +193,7 @@ public class Spawner : MonoBehaviour
                         {
                             if (true)
                             {
-                                GameObject tree = Instantiate(treePrefab, new Vector3(halfWidthMap + i, 0.3f, j - halfHeightMap), Quaternion.identity) as GameObject;
+                                GameObject tree = Instantiate(treePrefab, new Vector3(halfWidthMap + i, -0.3f, j - halfHeightMap), Quaternion.identity) as GameObject;
                                 float scale = UnityEngine.Random.Range(1f, 4.5f);
                                 tree.transform.localScale = new Vector3(scale, scale, scale);
                                 tree.transform.parent = GameObject.Find("Trees").transform;

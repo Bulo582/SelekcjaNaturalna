@@ -11,13 +11,29 @@ public class ArrayToTxt
     static string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
     static string path = Path.Combine(desktop, "TestLand");
     public static bool Do = true;
+    string folderName;
 
-    public static void ThrowLogToFile(string alias, string log)
+    public ArrayToTxt(string folderName)
     {
-        string filePath = Path.Combine(path, $"Log{alias}.txt");
-        using (StreamWriter sw = new StreamWriter(filePath))
+        this.folderName = folderName;
+        if (folderName == "")
+            folderName = "Unknow";
+        FileHelper.CreateFolder(path, folderName);
+    }
+
+    public  void ThrowLogToFile(string alias, string log)
+    {
+        if (Do)
         {
-            sw.WriteLine(log);
+            string filePath;
+            if (alias != "")
+                filePath = Path.Combine(path, folderName, $"Log{alias}.txt");
+            else
+                filePath = Path.Combine(path, $"Log{alias}.txt");
+            using (StreamWriter sw = new StreamWriter(filePath))
+            {
+                sw.WriteLine(log);
+            }
         }
     }
 
@@ -225,9 +241,14 @@ public class ArrayToTxt
             }
         }
     }
-    public static void ReadMapArray2D(char[,] array, string alias = "")
+    public void ReadMapArray2D(char[,] array, string alias = "")
     {
-        string filePath = Path.Combine(path, $"Map{alias}.txt");
+        string filePath;
+        if (alias != "")
+            filePath = Path.Combine(path, folderName,$"Map{alias}.txt");
+        else
+            filePath = Path.Combine(path, $"Map{alias}.txt");
+
         if (Do)
         {
             try
@@ -253,6 +274,39 @@ public class ArrayToTxt
             }
         }
     }
+    public static void StaticReadMapArray2D(char[,] array, string alias = "")
+    {
+        string filePath;
+        filePath = Path.Combine(path, $"Map{alias}.txt");
 
+        if (Do)
+        {
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(filePath))
+                {
+                    sw.WriteLine($"{array.GetLength(0)}-{array.GetLength(1)}");
+                    for (int i = 0; i < array.GetLength(0); i++)
+                    {
+                        for (int j = 0; j < array.GetLength(1); j++)
+                        {
+                            sw.Write($"{array[i, j]} -");
+                        }
+                        sw.WriteLine();
+                    }
 
+                }
+                UnityEngine.Debug.Log("FileCreated - Map");
+            }
+            catch (Exception ex)
+            {
+                UnityEngine.Debug.Log(ex.Message);
+            }
+        }
+    }
+
+    public static string TestFolder
+    {
+        get { return path; }
+    }
 }

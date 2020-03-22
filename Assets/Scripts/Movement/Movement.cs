@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public enum Direction
@@ -14,12 +15,18 @@ public enum Direction
 
 public class Movement : MonoBehaviour
 {
+    static int numberOfPerson = 1;
+    
+    public bool agro = false;
     public int iteration = 0;
+
     float animationTime = 2f;
     float globalMovementIncrease = 0.5f;
     public readonly float movementSpeed = 1.2f;
     public float movementCooldown = 0;
+
     public Vector3 actualPosition;
+
     bool animationWork;
 
     public int arrayPozX;
@@ -30,10 +37,14 @@ public class Movement : MonoBehaviour
     int halfHeightMap;
 
     DirMove dirMove;
-
+    FieldOfView fow;
+    Stats thisStats;
+    ArrayToTxt logWritter;
     private char[] blockableChar = { 'X', 'T', 'C', 'R', 'O' };
     void Start()
     {
+        logWritter = new ArrayToTxt(this.gameObject.name);
+        thisStats = GetComponent<Stats>();
         actualPosition = this.gameObject.transform.position;
         animationWork = false;
 
@@ -43,13 +54,13 @@ public class Movement : MonoBehaviour
         arrayPozX = Convert.ToInt16(actualPosition.x) + halfHeightMap;
         arrayPozZ = Convert.ToInt16(actualPosition.z) - halfWidthMap;
 
+
         accesArea = ArrayModify.CircleOut(Spawner.Instance.GenerateMap, arrayPozZ, arrayPozX, 1); //tip! reverse argument x/z
 
         dirMove = new DirMove(Direction.right);
-        ArrayToTxt.ReadMapArray2D(Spawner.Instance.GenerateMap);
-        Debug.Log($"Res {iteration}\n" +
-    $"{OldLog()}");
-        ArrayToTxt.ThrowLogToFile(iteration.ToString(), OldLog());
+
+        logWritter.ReadMapArray2D(Spawner.Instance.GenerateMap);
+        logWritter.ThrowLogToFile(iteration.ToString(), OldLog());
     }
 
     public string OldLog()
@@ -73,33 +84,63 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
+
         if (!animationWork)
             if (movementCooldown <= movementSpeed)
                 movementCooldown += globalMovementIncrease * Time.deltaTime;
             else
             {
                 StartCoroutine("MoveTime", animationTime);
+                numberOfPerson++;
             }
+       
     }
     public IEnumerator MoveTime()
     {
         movementCooldown = 0;
         animationWork = true;
-        RandomMove();
         iteration++;
-        Debug.Log($"Jump {iteration}\n" +
-            $"{OldLog()}");
-        ArrayToTxt.ReadMapArray2D(Spawner.Instance.GenerateMap, iteration.ToString());
-        ArrayToTxt.ThrowLogToFile(iteration.ToString(), OldLog());
-        yield return new WaitForSeconds(animationTime);
-
-        animationWork = false;
+        fow = GetComponent<FieldOfView>();
+        if (fow.visibleTargets.Count == 0)
+        {
+            RandomMove();
+            logWritter.ReadMapArray2D(Spawner.Instance.GenerateMap, iteration.ToString());
+            logWritter.ThrowLogToFile(iteration.ToString(), OldLog());
+            yield return new WaitForSeconds(animationTime);
+            animationWork = false;
+        }
+        else if (fow.visibleTargets.Count > 0)
+        {
+            Transform target = fow.visibleTargets.First();
+            MoveToTartget(target);
+            logWritter.ReadMapArray2D(Spawner.Instance.GenerateMap);
+            logWritter.ThrowLogToFile(iteration.ToString(), OldLog());
+            yield return new WaitForSeconds(animationTime);
+            animationWork = false;
+        }
+    }
+    public void MoveToTartget(Transform target)
+    {
+        List<Node> path = GetComponent<Pathfinding>().FindPath(target);
+        if (path.Count > 0)
+        {
+            Node step = path.First();
+            dirMove.dir = step.dir;
+            dirMove.move = DirToVect3(dirMove.dir);
+            MoveObject(dirMove.dir);
+            TurnObject(dirMove.dir);
+            DirToArrayPoz();
+        }
+        else
+        {
+            fow.visibleTargets.Clear();
+            target.gameObject.SetActive(false);
+        }
     }
     public void RandomMove()
     {
         ChooseWay(accesArea);
         MoveObject(dirMove.dir);
-        //transform.position = transform.localPosition + DirToVect3(dirMove.dir);
         TurnObject(dirMove.dir);
         DirToArrayPoz();
         accesArea = ArrayModify.CircleOut(Spawner.Instance.GenerateMap, arrayPozZ, arrayPozX, 1);
@@ -112,25 +153,25 @@ public class Movement : MonoBehaviour
     {
         if (dirMove.dir == Direction.up)
         {
-            Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = '4';
+            Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = Spawner.Instance.originalMap[arrayPozX, arrayPozZ];
             arrayPozX--;
             Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = 'R';
         }
         else if (dirMove.dir == Direction.down)
         {
-            Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = '4';
+            Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = Spawner.Instance.originalMap[arrayPozX, arrayPozZ];
             arrayPozX++;
             Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = 'R';
         }
         else if (dirMove.dir == Direction.right)
         {
-            Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = '4';
+            Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = Spawner.Instance.originalMap[arrayPozX, arrayPozZ];
             arrayPozZ++;
             Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = 'R';
         }
         else if (dirMove.dir == Direction.left)
         {
-            Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = '4';
+            Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = Spawner.Instance.originalMap[arrayPozX, arrayPozZ];
             arrayPozZ--;
             Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = 'R';
         }

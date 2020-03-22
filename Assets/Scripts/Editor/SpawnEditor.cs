@@ -27,10 +27,10 @@ public class SpawnEditor : Editor
             }
             Spawner.InstanceCreator(MeshGenerator.HeightMap, MapGenerator.MapHeight, MapGenerator.MapWidth, MapGenerator.Regions);
             Spawner.Instance.SpawnRabbits(sv.rabbitStartCount);
-            Spawner.Instance.SpawnFoxes(sv.foxesStartCount);
+            //Spawner.Instance.SpawnFoxes(sv.foxesStartCount);
             Spawner.Instance.SpawnCarrots(sv.carrotSpawnCound);
             Spawner.Instance.SpawnTrees(sv.treeCount);
-            ArrayToTxt.ReadMapArray2D(Spawner.Instance.GenerateMap);
+            ArrayToTxt.StaticReadMapArray2D(Spawner.Instance.GenerateMap);
         }
         if (GUILayout.Button("Clear"))
         {

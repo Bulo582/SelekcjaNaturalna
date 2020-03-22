@@ -16,7 +16,7 @@ public class Generate : MonoBehaviour
         {
             Spawner.InstanceCreator(MeshGenerator.HeightMap, MapGenerator.MapHeight, MapGenerator.MapWidth, MapGenerator.Regions);
             Spawner.Instance.SpawnRabbits(sv.rabbitStartCount);
-            Spawner.Instance.SpawnFoxes(sv.foxesStartCount);
+            //Spawner.Instance.SpawnFoxes(sv.foxesStartCount);
             Spawner.Instance.SpawnCarrots(sv.carrotSpawnCound);
             Spawner.Instance.SpawnTrees(sv.treeCount);
         }
@@ -26,6 +26,6 @@ public class Generate : MonoBehaviour
             Spawner.Instance.TestSpawn();
         }
         //Debug.Log($"What is on postion = {ArrayModify.TypeField(Spawner.Instance.GenerateMap, 0, 4)}");
-        ArrayToTxt.ReadMapArray2D(Spawner.Instance.GenerateMap);
+        ArrayToTxt.StaticReadMapArray2D(Spawner.Instance.GenerateMap);
     }
 }

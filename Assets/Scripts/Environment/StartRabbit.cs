@@ -5,17 +5,17 @@ using UnityEngine;
 public class StartRabbit : MonoBehaviour
 {
     [Header("Rabbit")]
-    public short reproductionCapacity;
-    public short reproductionAge;
-    public short age;
-    public short limitAge;
+     short reproductionCapacity;
+     short reproductionAge;
+     short age;
+     short limitAge;
     public float movementSpeed;
     public float rangeOfView;
     public float hunger;
-    public float thrist;
-    public float strength;
-    public Color femaleColor;
-    public Color maleColour;
+     float thrist;
+     float strength;
+     Color femaleColor;
+     Color maleColour;
 
     private void Awake()
     {

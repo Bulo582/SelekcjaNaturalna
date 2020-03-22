@@ -8,6 +8,7 @@ public class Stats : MonoBehaviour
     float getOlderIncrease = 0.001f;
 
     public string Name;
+    public int getNameNumber;
 
     float maxHunger;
     [Header("Hunger")]
@@ -16,11 +17,8 @@ public class Stats : MonoBehaviour
     {
         Name = this.gameObject.name;
         maxHunger = StartRabbit.Manager.hunger;
-    }
-
-    private void Update()
-    {
-
+        int.TryParse(Name.Split('_')[1], out int result);
+        getNameNumber = result;
     }
 
     public void Meal(float hangerValue)

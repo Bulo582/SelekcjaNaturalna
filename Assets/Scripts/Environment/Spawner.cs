@@ -18,10 +18,7 @@ public class Spawner : MonoBehaviour
     int rabbitIndex = 0;
     int foxIndex = 0;
 
-    bool[] rabbitsField;
-    bool[] foxsField;
-    bool[] treesField;
-    bool[] plantsFields;
+    public readonly char[,] originalMap;
 
     public char[,] GenerateMap
     {
@@ -64,7 +61,7 @@ public class Spawner : MonoBehaviour
         this.halfHeightMap = (heightMap - 2) / 2;
         this.regions = regions;
         generateMap = ArrayModify.GenerateArray(noiseMap,regions);
-        
+        originalMap = ArrayModify.GenerateArray(noiseMap, regions);
         //ArrayToTxt.CircleChechout(ref generateMap, 0, 0, 10, 'C');
         rabbitPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/Rabbit.prefab", typeof(GameObject));
         carrotPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/CarrotSpawn.prefab", typeof(GameObject));
@@ -74,14 +71,18 @@ public class Spawner : MonoBehaviour
     #region Spawns
     public void TestSpawn()
     {
-        GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap +1, 0.3f, 0 - halfHeightMap), Quaternion.identity) as GameObject;
+        int rabbitX = 1;
+        int rabbitY = 2;
+        GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + rabbitX, 0.3f, rabbitY - halfHeightMap), Quaternion.identity) as GameObject;
         rabbit.name = "Rabbit" + rabbitIndex;
         rabbit.transform.parent = GameObject.Find("Rabbits").transform;
-        generateMap[1, 0] = 'R';
+        generateMap[rabbitX, rabbitY] = 'R';
 
-        GameObject carriot = Instantiate(carrotPrefab, new Vector3(halfWidthMap + 2, 0.2f, 0 - halfHeightMap), Quaternion.identity) as GameObject;
+        int carrotX = 7;
+        int carrotY = 3;
+        GameObject carriot = Instantiate(carrotPrefab, new Vector3(halfWidthMap + carrotX, 0.2f, carrotY - halfHeightMap), Quaternion.identity) as GameObject;
         carriot.transform.parent = GameObject.Find("Carrots").transform;
-        generateMap[2, 0] = 'C';
+        generateMap[carrotX, carrotY] = 'C';
     }
     public void SpawnRabbits(int count)
     {
@@ -108,7 +109,7 @@ public class Spawner : MonoBehaviour
                         {
                             rabbitIndex++;
                             GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + i, 0.3f, j - halfHeightMap), Quaternion.identity) as GameObject;
-                            rabbit.name = "Rabbit" + rabbitIndex;
+                            rabbit.name = "Rabbit_" + rabbitIndex;
                             rabbit.transform.parent = GameObject.Find("Rabbits").transform;
                             generateMap[i, j] = 'R';
                             generated++;

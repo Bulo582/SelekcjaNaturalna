@@ -371,6 +371,7 @@ GameObject:
   - component: {fileID: 3050867321139349167}
   - component: {fileID: 2863516664257646603}
   - component: {fileID: 1200074001377983023}
+  - component: {fileID: 8592345745185898512}
   m_Layer: 10
   m_Name: Rabbit
   m_TagString: Rabbit
@@ -469,8 +470,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b821c6f5f0a47a4fb4eab9fbe1a36b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  viewRadious: 20
-  viewAngle: 90
+  viewRadious: 4
+  viewAngle: 360
   targetMask:
     serializedVersion: 2
     m_Bits: 512
@@ -519,11 +520,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9328d0c25e28574d911eb50651d2a6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  agro: 0
   iteration: 0
   movementCooldown: 0
   actualPosition: {x: 0, y: 0, z: 0}
   arrayPozX: 0
   arrayPozZ: 0
+--- !u!114 &8592345745185898512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5350935412134793484}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1c374f36af9a39459fc49ba5072c2c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6014252239765151316
 GameObject:
   m_ObjectHideFlags: 0

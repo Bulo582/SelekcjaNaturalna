@@ -15,7 +15,8 @@ public enum Direction
 
 public class Movement : MonoBehaviour
 {
-    static int numberOfPerson = 1;
+    int numberOfPerson;
+    public bool ready = false;
     
     public bool agro = false;
     public int iteration = 0;
@@ -45,6 +46,7 @@ public class Movement : MonoBehaviour
     {
         logWritter = new ArrayToTxt(this.gameObject.name);
         thisStats = GetComponent<Stats>();
+        numberOfPerson = thisStats.getNameNumber;
         actualPosition = this.gameObject.transform.position;
         animationWork = false;
 
@@ -54,37 +56,20 @@ public class Movement : MonoBehaviour
         arrayPozX = Convert.ToInt16(actualPosition.x) + halfHeightMap;
         arrayPozZ = Convert.ToInt16(actualPosition.z) - halfWidthMap;
 
-
         accesArea = ArrayModify.CircleOut(Spawner.Instance.GenerateMap, arrayPozZ, arrayPozX, 1); //tip! reverse argument x/z
 
         dirMove = new DirMove(Direction.right);
 
         logWritter.ReadMapArray2D(Spawner.Instance.GenerateMap);
         logWritter.ThrowLogToFile(iteration.ToString(), OldLog());
+        MovementController.Creatures.Add(this);
     }
 
-    public string OldLog()
-    {
-        string log = $"{transform.name}\n";
-        for (int i = 0; i < accesArea.GetLength(0); i++)
-        {
-            for (int j = 0; j < accesArea.GetLength(0); j++)
-            {
-                log += accesArea[i, j].ToString();
-            }
-            log += "\n";
-        }
 
-        log += $"Dir = {dirMove.dir.ToString()}\n";
-        log += $"X = {arrayPozX} Z = {arrayPozZ}\n";
-        log += $"What is on postion = {ArrayModify.TypeField(Spawner.Instance.GenerateMap, arrayPozX, arrayPozZ)}\n";
-        log += $"Real position = {transform.position.x}, {transform.position.z}";
-        return log;
-    }
+    
 
     void Update()
     {
-
         if (!animationWork)
             if (movementCooldown <= movementSpeed)
                 movementCooldown += globalMovementIncrease * Time.deltaTime;
@@ -93,7 +78,6 @@ public class Movement : MonoBehaviour
                 StartCoroutine("MoveTime", animationTime);
                 numberOfPerson++;
             }
-       
     }
     public IEnumerator MoveTime()
     {
@@ -388,6 +372,25 @@ public class Movement : MonoBehaviour
     void MoveObject(Direction dir)
     {
         transform.position = transform.localPosition + DirToVect3(dir);
+    }
+
+    public string OldLog()
+    {
+        string log = $"{transform.name}\n";
+        for (int i = 0; i < accesArea.GetLength(0); i++)
+        {
+            for (int j = 0; j < accesArea.GetLength(0); j++)
+            {
+                log += accesArea[i, j].ToString();
+            }
+            log += "\n";
+        }
+
+        log += $"Dir = {dirMove.dir.ToString()}\n";
+        log += $"X = {arrayPozX} Z = {arrayPozZ}\n";
+        log += $"What is on postion = {ArrayModify.TypeField(Spawner.Instance.GenerateMap, arrayPozX, arrayPozZ)}\n";
+        log += $"Real position = {transform.position.x}, {transform.position.z}";
+        return log;
     }
     public struct DirMove
     {

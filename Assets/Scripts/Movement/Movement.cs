@@ -4,23 +4,25 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public enum Direction
-{
-    up = 1,
-    right = 2,
-    down = 3,
-    left = 4,
-    none = 5
-}
-
 public class Movement : MonoBehaviour
 {
+    bool HaveTarget
+    {
+        get
+        {
+            if (fow.visibleTargets.Count > 0)
+                return true;
+            else
+                return false;
+        }
+    }
     int numberOfPerson;
     public bool ready = false;
-    
-    public bool agro = false;
+    private bool populationReady = false;
+    private bool waitForRest = false;
     public int iteration = 0;
 
+    public bool waitForCoolDown = true;
     float animationTime = 2f;
     float globalMovementIncrease = 0.5f;
     public readonly float movementSpeed = 1.2f;
@@ -33,105 +35,92 @@ public class Movement : MonoBehaviour
     public int arrayPozX;
     public int arrayPozZ;
     public char[,] accesArea;
-
-    int halfWidthMap;
-    int halfHeightMap;
+    private char[] blockableChar = { 'X', 'T', 'C', 'R', 'O' };
 
     DirMove dirMove;
     FieldOfView fow;
-    Stats thisStats;
+    Stats stats;
     ArrayToTxt logWritter;
-    private char[] blockableChar = { 'X', 'T', 'C', 'R', 'O' };
+
     void Start()
     {
         logWritter = new ArrayToTxt(this.gameObject.name);
-        thisStats = GetComponent<Stats>();
-        numberOfPerson = thisStats.getNameNumber;
+        fow = GetComponent<FieldOfView>();
+        stats = GetComponent<Stats>();
+
+        numberOfPerson = stats.getNameNumber;
         actualPosition = this.gameObject.transform.position;
-        animationWork = false;
-
-        halfHeightMap = Spawner.Instance.HalfHeightMap;
-        halfWidthMap = Spawner.Instance.HalfWidthMap;
-
-        arrayPozX = Convert.ToInt16(actualPosition.x) + halfHeightMap;
-        arrayPozZ = Convert.ToInt16(actualPosition.z) - halfWidthMap;
-
-        accesArea = ArrayModify.CircleOut(Spawner.Instance.GenerateMap, arrayPozZ, arrayPozX, 1); //tip! reverse argument x/z
-
+        arrayPozX = Convert.ToInt16(actualPosition.x) + Spawner.Instance.HalfHeightMap;
+        arrayPozZ = Convert.ToInt16(actualPosition.z) - Spawner.Instance.HalfWidthMap;
         dirMove = new DirMove(Direction.right);
 
-        logWritter.ReadMapArray2D(Spawner.Instance.GenerateMap);
-        logWritter.ThrowLogToFile(iteration.ToString(), OldLog());
         MovementController.Creatures.Add(this);
     }
 
-
-    
-
     void Update()
     {
-        if (!animationWork)
-            if (movementCooldown <= movementSpeed)
-                movementCooldown += globalMovementIncrease * Time.deltaTime;
+        if (!waitForRest)
+        {
+            if (fow.visibleTargets.Count > 0)
+                ToTargetMove();
             else
+                RandomMove();
+            if (populationReady)
             {
-                StartCoroutine("MoveTime", animationTime);
-                numberOfPerson++;
+                waitForRest = true;
+                StartCoroutine("Move", animationTime);
             }
+        }
     }
-    public IEnumerator MoveTime()
+
+    public void ToTargetMove()
     {
-        movementCooldown = 0;
-        animationWork = true;
         iteration++;
-        fow = GetComponent<FieldOfView>();
-        if (fow.visibleTargets.Count == 0)
-        {
-            RandomMove();
-            logWritter.ReadMapArray2D(Spawner.Instance.GenerateMap, iteration.ToString());
-            logWritter.ThrowLogToFile(iteration.ToString(), OldLog());
-            yield return new WaitForSeconds(animationTime);
-            animationWork = false;
-        }
-        else if (fow.visibleTargets.Count > 0)
-        {
-            Transform target = fow.visibleTargets.First();
-            MoveToTartget(target);
-            logWritter.ReadMapArray2D(Spawner.Instance.GenerateMap);
-            logWritter.ThrowLogToFile(iteration.ToString(), OldLog());
-            yield return new WaitForSeconds(animationTime);
-            animationWork = false;
-        }
-    }
-    public void MoveToTartget(Transform target)
-    {
+        Transform target = fow.visibleTargets.First();
         List<Node> path = GetComponent<Pathfinding>().FindPath(target);
         if (path.Count > 0)
         {
             Node step = path.First();
             dirMove.dir = step.dir;
             dirMove.move = DirToVect3(dirMove.dir);
-            MoveObject(dirMove.dir);
-            TurnObject(dirMove.dir);
             DirToArrayPoz();
         }
-        else
-        {
-            fow.visibleTargets.Clear();
-            target.gameObject.SetActive(false);
-        }
+        PrintTxtLogs();
+        ready = true;
+        StartCoroutine("CoordinatePopulation", animationTime);
     }
     public void RandomMove()
     {
+        accesArea = ArrayModify.CircleOut(Spawner.Instance.GenerateMap, arrayPozZ, arrayPozX, 1);
         ChooseWay(accesArea);
+        DirToArrayPoz();
+        PrintTxtLogs();
+        ready = true;
+        StartCoroutine("CoordinatePopulation", animationTime);
+    }
+
+    public IEnumerator Move(float time)
+    {
+        yield return new WaitForSeconds(1);
         MoveObject(dirMove.dir);
         TurnObject(dirMove.dir);
-        DirToArrayPoz();
-        accesArea = ArrayModify.CircleOut(Spawner.Instance.GenerateMap, arrayPozZ, arrayPozX, 1);
+        movementCooldown = 0;
+        ready = false;
+        waitForRest = false;
+        populationReady = false;
+        
     }
+    public IEnumerator CoordinatePopulation()
+    {
+        yield return new WaitWhile(() => MovementController.IsReady() == false);
+        populationReady = true;
+    }
+
+
+    #region Array/Prepare to Move
+
     /// <summary>
-    /// Atrer take way 
-    /// Change: arrayPozX, arrayPozZ, Spawner.Instance.GenerateMap[x,y]
+    /// Change map array
     /// </summary>
     public void DirToArrayPoz()
     {
@@ -160,18 +149,12 @@ public class Movement : MonoBehaviour
             Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = 'R';
         }
     }
-    public static Vector3 DirToVect3(Direction direction)
-    {
-        if (direction == Direction.up)
-            return new Vector3(-1f, 0f, 0f);
-        else if (direction == Direction.left)
-            return new Vector3(0f, 0f, -1f);
-        else if (direction == Direction.down)
-            return new Vector3(1f, 0f, 0f);
-        else if (direction == Direction.right)
-            return new Vector3(0f, 0f, 1f);
-        else return new Vector3(0f, 0f, 0f);
-    }
+
+    /// <summary>
+    /// Choose random way among acces area fileds
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <returns></returns>
     int WayIndex(bool[] pos)
     {
         if (pos.Length != 3)
@@ -187,6 +170,10 @@ public class Movement : MonoBehaviour
         }
         return 3;
     }
+    /// <summary>
+    /// Change MoveDir struct
+    /// </summary>
+    /// <param name="accesArea"></param>
     public void ChooseWay(char[,] accesArea)
     {
         // RIGHT 
@@ -358,6 +345,30 @@ public class Movement : MonoBehaviour
             }
         }
     }
+
+    #endregion
+
+    #region Move
+    void MoveObject(Direction dir)
+    {
+        transform.position = transform.localPosition + DirToVect3(dir);
+    }
+    public static Vector3 DirToVect3(Direction direction)
+    {
+        if (direction == Direction.up)
+            return new Vector3(-1f, 0f, 0f);
+        else if (direction == Direction.left)
+            return new Vector3(0f, 0f, -1f);
+        else if (direction == Direction.down)
+            return new Vector3(1f, 0f, 0f);
+        else if (direction == Direction.right)
+            return new Vector3(0f, 0f, 1f);
+        else return new Vector3(0f, 0f, 0f);
+    }
+    /// <summary>
+    /// Move method.
+    /// </summary>
+    /// <param name="dir"></param>
     public void TurnObject(Direction dir)
     {
         if (dir == Direction.right)
@@ -369,11 +380,23 @@ public class Movement : MonoBehaviour
         else if (dir == Direction.left)
             this.gameObject.transform.rotation = Quaternion.Euler(0, -180, 0);
     }
-    void MoveObject(Direction dir)
+    #endregion
+
+    struct DirMove
     {
-        transform.position = transform.localPosition + DirToVect3(dir);
+        public Direction dir;
+        public bool[] pos;
+        public Vector3 move;
+
+        public DirMove(Direction dir)
+        {
+            this.dir = dir;
+            this.pos = new bool[3];
+            move = DirToVect3(Direction.none);
+        }
     }
 
+    // -------------------- No mather things
     public string OldLog()
     {
         string log = $"{transform.name}\n";
@@ -392,19 +415,9 @@ public class Movement : MonoBehaviour
         log += $"Real position = {transform.position.x}, {transform.position.z}";
         return log;
     }
-    public struct DirMove
+    public void PrintTxtLogs()
     {
-        public Direction dir;
-        public bool[] pos;
-        public Vector3 move;
-
-        public DirMove(Direction dir)
-        {
-            this.dir = dir;
-            this.pos = new bool[3];
-            move = Movement.DirToVect3(Direction.none);
-        }
+        logWritter.ReadMapArray2D(Spawner.Instance.GenerateMap, iteration.ToString());
+        logWritter.ThrowLogToFile(iteration.ToString(), OldLog());
     }
 }
-
-

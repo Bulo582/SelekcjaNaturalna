@@ -507,6 +507,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Name: 
+  getNameNumber: 0
   currentHunger: 0
 --- !u!114 &1200074001377983023
 MonoBehaviour:
@@ -517,11 +518,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 5350935412134793484}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c9328d0c25e28574d911eb50651d2a6a, type: 3}
+  m_Script: {fileID: 11500000, guid: 325c820416194e84eb845d2a187ca7b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agro: 0
+  ready: 0
   iteration: 0
+  waitForCoolDown: 1
   movementCooldown: 0
   actualPosition: {x: 0, y: 0, z: 0}
   arrayPozX: 0

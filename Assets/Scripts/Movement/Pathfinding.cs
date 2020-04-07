@@ -24,8 +24,8 @@ public class Pathfinding : MonoBehaviour
     public List<Node> FindPath(Transform target)
     {
         List<Node> path = new List<Node>();
-        Node nodeSeeker = new Node(TransormX_ToMapX(transform.position.x), TransormZ_ToMapY(transform.position.z));
-        Node nodeTarget = new Node(TransormX_ToMapX(target.position.x), TransormZ_ToMapY(target.position.z));
+        Node nodeSeeker = new Node(MapHelper.TransormX_ToMapX(transform.position.x), MapHelper.TransormZ_ToMapY(transform.position.z));
+        Node nodeTarget = new Node(MapHelper.TransormX_ToMapX(target.position.x), MapHelper.TransormZ_ToMapY(target.position.z));
         Node current = null;
         List<Node> openList = new List<Node>();
         List<Node> closedList = new List<Node>();
@@ -78,16 +78,5 @@ public class Pathfinding : MonoBehaviour
         }
         path.Reverse();
         return path;
-    }
-
-    //----------------------- for optimalize method. New Class 
-    public int TransormX_ToMapX(float XPos)
-    {
-        return (Convert.ToInt16(XPos)) + Spawner.Instance.HalfHeightMap;
-    }
-
-    public int TransormZ_ToMapY(float ZPos)
-    {
-        return (Convert.ToInt16(ZPos)) - Spawner.Instance.HalfWidthMap;
     }
 }

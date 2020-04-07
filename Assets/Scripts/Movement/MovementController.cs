@@ -11,14 +11,28 @@ public enum Direction
     left = 4,
     none = 5
 }
-public class MovementController
+public class MovementController 
 {
     public static List<Movement> Creatures = new List<Movement>();
-    public static int iteration = 0;
     public static bool IsReady()
     {
         return Creatures.All(l => l.ready == true);
     }
+    public static bool IsNotReady()
+    {
+        return Creatures.All(l => l.ready == false);
+    }
 
-
+    public static void NumeringPopulation()
+    {
+        if (Creatures != null)
+        {
+            int idx = 1;
+            foreach (var item in Creatures)
+            {
+                item.rabbitLife.getNameNumber = idx;
+                idx++;
+            }
+        }
+    }
 }

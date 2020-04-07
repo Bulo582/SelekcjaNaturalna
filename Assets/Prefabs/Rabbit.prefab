@@ -369,7 +369,6 @@ GameObject:
   - component: {fileID: 7665773984415740635}
   - component: {fileID: 259568807874969228}
   - component: {fileID: 3050867321139349167}
-  - component: {fileID: 2863516664257646603}
   - component: {fileID: 1200074001377983023}
   - component: {fileID: 8592345745185898512}
   m_Layer: 10
@@ -491,21 +490,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ba35f4186a61fc489c1738b63f9b2e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  movementSpeed: 0
-  rangeOfView: 0
-  hunger: 0
---- !u!114 &2863516664257646603
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5350935412134793484}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1434bdd8f6fcf1e4d8bfecb6dce0b00a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
   Name: 
   getNameNumber: 0
   currentHunger: 0
@@ -524,7 +508,7 @@ MonoBehaviour:
   ready: 0
   iteration: 0
   waitForCoolDown: 1
-  movementCooldown: 0
+  currentMovementCooldown: 0
   actualPosition: {x: 0, y: 0, z: 0}
   arrayPozX: 0
   arrayPozZ: 0

@@ -17,6 +17,9 @@ public class Spawner : MonoBehaviour
     TerrainType[] regions;
     int rabbitIndex = 0;
     int foxIndex = 0;
+    FamilyRabbit[] familyRabbit;
+    int RabbitPopulationSum;
+    readonly int maxRange;
 
     public readonly char[,] originalMap;
 
@@ -25,6 +28,10 @@ public class Spawner : MonoBehaviour
         get
         {
             return this.generateMap;
+        }
+        set
+        {
+            value = this.generateMap;
         }
     }
 
@@ -57,9 +64,12 @@ public class Spawner : MonoBehaviour
 
     public Spawner(float[,] noiseMap, int heightMap, int widthMap, TerrainType[] regions)
     {
+        familyRabbit = Generate.sv.familyRabbits;
+        RabbitPopulationSum = Generate.sv.FamilyPopSum();
         this.halfWidthMap = (widthMap - 2) / -2;
         this.halfHeightMap = (heightMap - 2) / 2;
         this.regions = regions;
+        maxRange = MapGenerator.MapSize * MapGenerator.MapSize;
         generateMap = ArrayModify.GenerateArray(noiseMap,regions);
         originalMap = ArrayModify.GenerateArray(noiseMap, regions);
         //ArrayToTxt.CircleChechout(ref generateMap, 0, 0, 10, 'C');
@@ -68,6 +78,29 @@ public class Spawner : MonoBehaviour
         foxPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/Fox.prefab", typeof(GameObject));
         treePrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/Tree.prefab", typeof(GameObject));
     }
+
+    public static Vector3 GetLegalVector3(float y = 0.2f)
+    {
+        int range;
+        while(true)
+        {
+            for (int i = 0; i < Instance.GenerateMap.GetLength(0); i++)
+            {
+                for (int j = 0; j < Instance.GenerateMap.GetLength(1); j++)
+                {
+                    if (int.TryParse(Instance.GenerateMap[i, j].ToString(), out int result) && result >= 2)
+                    {
+                        range = UnityEngine.Random.Range(0, 1000);
+                        if (range < 5)
+                        {
+                            return  new Vector3(Instance.HalfWidthMap + i, y, j - Instance.halfHeightMap);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     #region Spawns
     public void TestSpawn()
     {
@@ -84,10 +117,19 @@ public class Spawner : MonoBehaviour
         carriot.transform.parent = GameObject.Find("Carrots").transform;
         generateMap[carrotX, carrotY] = 'C';
     }
+    public void SpawnChildOfRabbit(int x, int y, FamilyRabbit familyRabbit)
+    {
+        GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + x, 0.3f, y - halfHeightMap), Quaternion.identity) as GameObject;
+        rabbit.GetComponent<RabbitLife>().FamilyRabbit = familyRabbit;
+        rabbit.name = $"Rabbit_{++Generate.RabbitPopSum}";
+        rabbit.transform.parent = GameObject.Find("Rabbits").transform;
+        generateMap[x, y] = 'R';
+    }
     public void SpawnRabbits(int count)
     {
         DeleteRabbits();
         int range;
+        int indexName = 0;
         int breakout = 0;
         int generated = 0;
         while(true)
@@ -95,7 +137,7 @@ public class Spawner : MonoBehaviour
             if (count >= generateMap.Length)
                 break;
             breakout++;
-            if (breakout > generateMap.Length)
+            if (breakout > MapGenerator.MapSize)
                 generated = breakout;
 
             for (int i = 0; i < generateMap.GetLength(0); i++)
@@ -104,15 +146,22 @@ public class Spawner : MonoBehaviour
                 {
                     if (int.TryParse(generateMap[i, j].ToString(), out int result) && result >= 2)
                     {
-                        range = UnityEngine.Random.Range(0, 100);
-                        if (range < 1)
+                        range = UnityEngine.Random.Range(0, maxRange);
+                        if (range == 0)
                         {
-                            rabbitIndex++;
-                            GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + i, 0.3f, j - halfHeightMap), Quaternion.identity) as GameObject;
-                            rabbit.name = "Rabbit_" + rabbitIndex;
-                            rabbit.transform.parent = GameObject.Find("Rabbits").transform;
-                            generateMap[i, j] = 'R';
-                            generated++;
+                            if (familyRabbit[rabbitIndex].startPop > 0)
+                            {
+                                indexName++;
+                                GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + i, 0.3f, j - halfHeightMap), Quaternion.identity) as GameObject;
+                                familyRabbit[rabbitIndex].startPop--;
+                                rabbit.GetComponent<RabbitLife>().FamilyRabbit = familyRabbit[rabbitIndex];
+                                rabbit.name = $"Rabbit_{indexName}";
+                                rabbit.transform.parent = GameObject.Find("Rabbits").transform;
+                                generateMap[i, j] = 'R';
+                                generated++;
+                            }
+                            else
+                                rabbitIndex++;
                         }
                     }
                     if (generated >= count)
@@ -139,7 +188,7 @@ public class Spawner : MonoBehaviour
             if (count >= generateMap.Length)
                 break;
             breakout++;
-            if (breakout > generateMap.Length)
+            if (breakout > Mathf.Abs(generateMap.Length))
                 generated = breakout;
             for (int i = 0; i < generateMap.GetLength(0); i++)
             {
@@ -147,8 +196,8 @@ public class Spawner : MonoBehaviour
                 {
                     if (int.TryParse(generateMap[i, j].ToString(), out int result) && result >= 3)
                     {
-                        range = UnityEngine.Random.Range(0, 100);
-                        if (range < 1)
+                        range = UnityEngine.Random.Range(0, maxRange);
+                        if (range < 2)
                         {
                             if (true)
                             {
@@ -181,7 +230,7 @@ public class Spawner : MonoBehaviour
             if (count >= generateMap.Length)
                 break;
             breakout++;
-            if (breakout > generateMap.Length)
+            if (breakout > generateMap.Length * 100)
                 generated = breakout;
             for (int i = 0; i < generateMap.GetLength(0); i++)
             {
@@ -192,16 +241,12 @@ public class Spawner : MonoBehaviour
                         range = UnityEngine.Random.Range(0, 100);
                         if (range < 1)
                         {
-                            if (true)
-                            {
-                                GameObject tree = Instantiate(treePrefab, new Vector3(halfWidthMap + i, -0.01f, j - halfHeightMap), Quaternion.identity) as GameObject;
-                                float scale = UnityEngine.Random.Range(1f, 4.5f);
-                                tree.transform.localScale = new Vector3(scale, scale, scale);
-                                tree.transform.parent = GameObject.Find("Trees").transform;
-                                generateMap[i, j] = 'T';
-                                generated++;
-                            }
-
+                            GameObject tree = Instantiate(treePrefab, new Vector3(halfWidthMap + i, -0.01f, j - halfHeightMap), Quaternion.identity) as GameObject;
+                            float scale = UnityEngine.Random.Range(1f, 4.5f);
+                            tree.transform.localScale = new Vector3(scale, scale, scale);
+                            tree.transform.parent = GameObject.Find("Trees").transform;
+                            generateMap[i, j] = 'T';
+                            generated++;
                         }
                     }
                     if (generated >= count)
@@ -312,4 +357,12 @@ public class Spawner : MonoBehaviour
     }
 
     #endregion
+
+    [System.Serializable]
+    public struct FamilyRabbit
+    {
+        public string FamilyName;
+        public Color color;
+        public int startPop;
+    }
 }

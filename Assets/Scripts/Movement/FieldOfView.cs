@@ -6,7 +6,7 @@ public class FieldOfView : MonoBehaviour
 {
     public float viewRadious;
     [Range (0, 360)]
-    public float viewAngle;
+    public float viewAngle = 360;
 
     public LayerMask targetMask;
     public LayerMask obstacleMask;
@@ -15,6 +15,8 @@ public class FieldOfView : MonoBehaviour
     
     private void Start()
     {
+        viewRadious = StartRabbit.Manager.rangeOfView;
+        viewAngle = 270;
         StartCoroutine("FindTargetWithDelay", .2f);
     }
 

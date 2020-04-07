@@ -5,24 +5,14 @@ using UnityEngine;
 public class StartRabbit : MonoBehaviour
 {
     [Header("Rabbit")]
-     short reproductionCapacity;
-     short reproductionAge;
-     short age;
-     short limitAge;
+
+    [Range(0.1f,10f)]
     public float movementSpeed;
     public float rangeOfView;
-    public float hunger;
-     float thrist;
-     float strength;
-     Color femaleColor;
-     Color maleColour;
-
-    private void Awake()
-    {
-        ColorUtility.TryParseHtmlString("#822358", out femaleColor);
-        ColorUtility.TryParseHtmlString("#823E23", out maleColour);
-    }
-
+    [Header("Hunger point to reproduction")]
+    public int hunger;
+    [Header("Iteration without meal to die")]
+    public int iterationToDie = 25;
     private static StartRabbit manager = null;
 
     public static StartRabbit Manager

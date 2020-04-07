@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e6c2536120f5f84288b081c5bd25e90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  carrotSpawnTime: 10
+  carrotSpawnTime: 5
   carrotSpawnIncease: 0.2
   currentCarrotSpawnTime: 0
 --- !u!1001 &2465606101664234261

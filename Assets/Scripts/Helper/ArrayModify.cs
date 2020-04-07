@@ -16,15 +16,15 @@ public class ArrayModify
     {
         if (array is null)
             throw new Exception("CircleCheckout NullReference Exception");
-        if ((mX > array.GetLength(1) && mX < 0) || (mY > array.GetLength(0) || mY < 0))
+        if ((mY > array.GetLength(1) && mY < 0) || (mX > array.GetLength(0) || mX < 0))
             throw new Exception("Mid point has coordinate incorrect");
 
         char[,] result = new char[r + 2, r + 2];
         int arrayX = array.GetLength(1);
         int arrayY = array.GetLength(0);
 
-        int dX = 0 - r + mX;
-        int dY = 0 - r + mY;
+        int dX = 0 - r + mY;
+        int dY = 0 - r + mX;
 
         int x;
         int y;
@@ -129,8 +129,30 @@ public class ArrayModify
             }
         }
         return newArray;
-
     }
+
+    public static float[,] RewriteLastXYOneBefore(float[,] oldArray)
+    {
+        float[,] newArray = new float[oldArray.GetLength(0), oldArray.GetLength(1)];
+        for (int i = 0; i < newArray.GetLength(0); i++)
+        {
+            for (int j = 0; j < newArray.GetLength(1); j++)
+            {
+                if(j == newArray.GetLength(1)-2)
+                {
+                    newArray[i, j] = oldArray[i, j + 1];
+                }
+                else if(i == newArray.GetLength(0) - 2)
+                {
+                    newArray[i, j] = oldArray[i + 1, j];
+                }
+                else
+                    newArray[i, j] = oldArray[i, j];
+            }
+        }
+        return newArray;
+    }
+
     public static float[,] ArrayCutXY(float[,] oldArray)
     {
         float[,] newArray = new float[oldArray.GetLength(0) - 1, oldArray.GetLength(1) - 1];
@@ -187,8 +209,7 @@ public class ArrayModify
                 {
                     if ((heightMap[x, y] <= regions[i].height))
                     {
-
-                        if (regions[i].name == "DeepWather" || regions[i].name == "Wather")
+                        if (regions[i].name == "DeepWather" || regions[i].name == "Wather" )
                         {
                             generateMap[x, y] = 'X';
                             log += generateMap[x, y] + "-";

@@ -5,23 +5,25 @@ using UnityEngine;
 
 public class CarrotSpawn : MonoBehaviour
 {
-    public float carrotSpawnTime;
-    public float carrotSpawnIncease;
-    public float currentCarrotSpawnTime;
+    public int iterationOnDead;
+    public int iterationToRespawn;
+    public int IterationOnRespawn
+    {
+        get { return iterationOnDead + iterationToRespawn; }
+    }
 
     private void Start()
     {
-        currentCarrotSpawnTime = 0;
+        iterationToRespawn = StartCarrot.Manager.iterationToRespawn;
     }
     void Update()
     {
         if(!this.gameObject.transform.GetChild(0).gameObject.activeSelf)
         {
-            currentCarrotSpawnTime += carrotSpawnIncease * Time.deltaTime;
-            if(currentCarrotSpawnTime >= carrotSpawnTime)
+            if (IterationOnRespawn == Movement.globalIteration)
             {
+                this.gameObject.transform.position = Spawner.GetLegalVector3();
                 this.gameObject.transform.GetChild(0).gameObject.SetActive(true);
-                currentCarrotSpawnTime = 0;
             }
         }
     }

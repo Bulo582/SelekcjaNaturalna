@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
+    private int antiBug;
     bool HaveTarget
     {
         get
@@ -16,106 +17,177 @@ public class Movement : MonoBehaviour
                 return false;
         }
     }
-    int numberOfPerson;
-    public bool ready = false;
+    public static int currentNumberMove = 1;
+    public int numberOfPerson 
+    { 
+        get 
+        {
+            return rabbitLife.getNameNumber;
+        }
+    }
+    internal bool ready = false;
     private bool populationReady = false;
-    private bool waitForRest = false;
-    public int iteration = 0;
+    private bool canMakeWay;
+    public static int globalIteration = 0;
+    public int iterationOfObject = 0;
 
-    public bool waitForCoolDown = true;
-    float animationTime = 2f;
-    float globalMovementIncrease = 0.5f;
-    public readonly float movementSpeed = 1.2f;
-    public float movementCooldown = 0;
+    int dietIteration;
+    public int NoEatIterationDie = 0;
+
+    float movementTime = 2f;
+    float movementCooldownIncrease = 5f;
+    public float currentMovementCooldown = 0;
 
     public Vector3 actualPosition;
 
-    bool animationWork;
-
     public int arrayPozX;
-    public int arrayPozZ;
+    public int arrayPozY;
     public char[,] accesArea;
-    private char[] blockableChar = { 'X', 'T', 'C', 'R', 'O' };
+    public static readonly char[] blockableChar = { 'X', 'T', 'C', 'R', 'O' };
 
     DirMove dirMove;
     FieldOfView fow;
-    Stats stats;
+    public RabbitLife rabbitLife;
     ArrayToTxt logWritter;
-
     void Start()
     {
+        dietIteration = StartRabbit.Manager.iterationToDie;
         logWritter = new ArrayToTxt(this.gameObject.name);
         fow = GetComponent<FieldOfView>();
-        stats = GetComponent<Stats>();
-
-        numberOfPerson = stats.getNameNumber;
+        rabbitLife = GetComponent<RabbitLife>();
+        movementCooldownIncrease = StartRabbit.Manager.movementSpeed;
         actualPosition = this.gameObject.transform.position;
-        arrayPozX = Convert.ToInt16(actualPosition.x) + Spawner.Instance.HalfHeightMap;
-        arrayPozZ = Convert.ToInt16(actualPosition.z) - Spawner.Instance.HalfWidthMap;
+        arrayPozX = MapHelper.TransormX_ToMapX(actualPosition.x);
+        arrayPozY = MapHelper.TransormZ_ToMapY(actualPosition.z);
         dirMove = new DirMove(Direction.right);
-
+        accesArea = ArrayModify.CircleOut(Spawner.Instance.GenerateMap, arrayPozX, arrayPozY, 1);
         MovementController.Creatures.Add(this);
+        canMakeWay = true;
+        PrintTxtLogs();
+    }
+    void FixedUpdate()
+    {
+        // Dlaczego obiekty się wieszają, chyba jak umierają
+
+        if (currentNumberMove == this.numberOfPerson && ready == false)
+        {
+            DecideWhatToDo();
+            
+        }
+
+        if (populationReady)
+        {
+            CooldownAndMove();
+        }
+
+        if (currentNumberMove > Generate.RabbitPopSum)
+        {
+            currentNumberMove = 1;
+        }
     }
 
-    void Update()
+    public void CooldownAndMove()
     {
-        if (!waitForRest)
+        currentMovementCooldown += movementCooldownIncrease * Time.deltaTime;
+        if (currentMovementCooldown >= movementTime)
+            Move();
+    }
+    public void DecideWhatToDo()
+    {
+        if (canMakeWay)
         {
-            if (fow.visibleTargets.Count > 0)
+            if (HaveTarget)
                 ToTargetMove();
             else
                 RandomMove();
-            if (populationReady)
-            {
-                waitForRest = true;
-                StartCoroutine("Move", animationTime);
-            }
         }
     }
-
-    public void ToTargetMove()
+    public void ToTargetMove() 
     {
-        iteration++;
-        Transform target = fow.visibleTargets.First();
-        List<Node> path = GetComponent<Pathfinding>().FindPath(target);
-        if (path.Count > 0)
+        NoEatIterationDie++;
+        iterationOfObject++;
+
+        if (NoEatIterationDie >= dietIteration)
         {
-            Node step = path.First();
-            dirMove.dir = step.dir;
-            dirMove.move = DirToVect3(dirMove.dir);
-            DirToArrayPoz();
+            Generate.RabbitPopSum--;
+            MovementController.Creatures.Remove(this);
+            Destroy(this.gameObject);
+            Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = Spawner.Instance.originalMap[arrayPozX, arrayPozY];
+            MovementController.NumeringPopulation();
         }
-        PrintTxtLogs();
-        ready = true;
-        StartCoroutine("CoordinatePopulation", animationTime);
+        else
+        {
+            Transform target = fow.visibleTargets.First();
+            List<Node> path = GetComponent<Pathfinding>().FindPath(target);
+            if (path.Count > 0)
+            {
+                Node step = path.First();
+                dirMove.dir = step.dir;
+                dirMove.move = DirToVect3(dirMove.dir);
+                DirToArrayPoz();
+                PrintTxtLogs();
+            }
+            else
+            {
+                dirMove.dir = Direction.none;
+                dirMove.move = DirToVect3(dirMove.dir);
+                DirToArrayPoz();
+                PrintTxtLogs();
+                fow.visibleTargets.Clear();
+                target.gameObject.GetComponentInParent<CarrotSpawn>().iterationOnDead = globalIteration;
+                this.gameObject.transform.LookAt(target);
+                target.gameObject.SetActive(false);
+                rabbitLife.Meal();
+                NoEatIterationDie = 0;
+            }
+            ready = true;
+            canMakeWay = false;
+            currentNumberMove++;
+            StartCoroutine("CoordinatePopulation");
+        }
     }
     public void RandomMove()
     {
-        accesArea = ArrayModify.CircleOut(Spawner.Instance.GenerateMap, arrayPozZ, arrayPozX, 1);
-        ChooseWay(accesArea);
-        DirToArrayPoz();
-        PrintTxtLogs();
-        ready = true;
-        StartCoroutine("CoordinatePopulation", animationTime);
+        NoEatIterationDie++;
+        iterationOfObject++;
+        if (NoEatIterationDie >= dietIteration)
+        {
+            Generate.RabbitPopSum--;
+            MovementController.Creatures.Remove(this);
+            Destroy(this.gameObject);
+            Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = Spawner.Instance.originalMap[arrayPozX, arrayPozY];
+            MovementController.NumeringPopulation();
+        }
+        else
+        {
+            accesArea = ArrayModify.CircleOut(Spawner.Instance.GenerateMap, arrayPozX, arrayPozY, 1);
+            ChooseWay(accesArea);
+            DirToArrayPoz();
+            PrintTxtLogs();
+            ready = true;
+            canMakeWay = false;
+            currentNumberMove++;
+            StartCoroutine("CoordinatePopulation");
+        }
     }
-
-    public IEnumerator Move(float time)
+    // dir jednek kierunek inny sprawdz przy jednem osobniku
+    public void Move()
     {
-        yield return new WaitForSeconds(1);
         MoveObject(dirMove.dir);
         TurnObject(dirMove.dir);
-        movementCooldown = 0;
+        currentMovementCooldown = 0;
         ready = false;
-        waitForRest = false;
+        canMakeWay = true;
         populationReady = false;
-        
+        if (numberOfPerson == Generate.RabbitPopSum)
+            globalIteration++;
+
     }
     public IEnumerator CoordinatePopulation()
     {
-        yield return new WaitWhile(() => MovementController.IsReady() == false);
-        populationReady = true;
+        yield return new WaitWhile(() => populationReady == true);
+        populationReady = MovementController.IsReady();
     }
-
 
     #region Array/Prepare to Move
 
@@ -126,28 +198,57 @@ public class Movement : MonoBehaviour
     {
         if (dirMove.dir == Direction.up)
         {
-            Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = Spawner.Instance.originalMap[arrayPozX, arrayPozZ];
+            Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = Spawner.Instance.originalMap[arrayPozX, arrayPozY];
             arrayPozX--;
-            Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = 'R';
+            Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = 'R';
         }
         else if (dirMove.dir == Direction.down)
         {
-            Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = Spawner.Instance.originalMap[arrayPozX, arrayPozZ];
+            Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = Spawner.Instance.originalMap[arrayPozX, arrayPozY];
             arrayPozX++;
-            Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = 'R';
+            Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = 'R';
         }
         else if (dirMove.dir == Direction.right)
         {
-            Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = Spawner.Instance.originalMap[arrayPozX, arrayPozZ];
-            arrayPozZ++;
-            Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = 'R';
+            Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = Spawner.Instance.originalMap[arrayPozX, arrayPozY];
+            arrayPozY++;
+            Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = 'R';
         }
         else if (dirMove.dir == Direction.left)
         {
-            Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = Spawner.Instance.originalMap[arrayPozX, arrayPozZ];
-            arrayPozZ--;
-            Spawner.Instance.GenerateMap[arrayPozX, arrayPozZ] = 'R';
+            Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = Spawner.Instance.originalMap[arrayPozX, arrayPozY];
+            arrayPozY--;
+            Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = 'R';
         }
+        else
+        {
+
+        }
+    }
+
+    public Direction DirectionDetect(char signToDetect )
+    {
+        if (signToDetect == accesArea[1, 0])
+        {
+            return Direction.left;
+        }
+        else if (signToDetect == accesArea[0, 1])
+        {
+
+            return Direction.up;
+        }
+        else if (signToDetect == accesArea[1, 2])
+        {
+
+            return Direction.right;
+        }
+        else if (signToDetect == accesArea[2, 1])
+        {
+
+            return Direction.down;
+        }
+        else
+            return Direction.none;
     }
 
     /// <summary>
@@ -157,18 +258,24 @@ public class Movement : MonoBehaviour
     /// <returns></returns>
     int WayIndex(bool[] pos)
     {
-        if (pos.Length != 3)
+        if (pos.Length != 4)
             throw new Exception("tabela 'pos' musi być [3]");
-        int rnd;
-        int inx = 0;
-        while (inx < 10)
+        else if (Array.TrueForAll(dirMove.pos, x => x == false))
+            return 4;
+        else if (!dirMove.pos[0] && !dirMove.pos[1] && !dirMove.pos[2] && dirMove.pos[3])
+            return 3;
+        else
         {
-            rnd = UnityEngine.Random.Range(0, 3);
-            if (pos[rnd] == true)
-                return rnd;
-            inx++;
+            int rnd;
+            int inx = 0;
+            while (true)
+            {
+                rnd = UnityEngine.Random.Range(0, 3);
+                if (pos[rnd] == true)
+                    return rnd;
+                inx++;
+            }
         }
-        return 3;
     }
     /// <summary>
     /// Change MoveDir struct
@@ -194,6 +301,11 @@ public class Movement : MonoBehaviour
             else
                 dirMove.pos[2] = true;
 
+            if(Array.Exists(blockableChar, x => x == accesArea[1, 0]))
+                dirMove.pos[3] = false;
+            else
+                dirMove.pos[3] = true;
+
             int inx = WayIndex(dirMove.pos);
 
             if (inx == 0)
@@ -211,10 +323,15 @@ public class Movement : MonoBehaviour
                 dirMove.move = DirToVect3(Direction.up);
                 dirMove.dir = Direction.up;
             }
-            else
+            else if (inx == 3)
             {
                 dirMove.move = DirToVect3(Direction.left);
                 dirMove.dir = Direction.left;
+            }
+            else
+            {
+                dirMove.move = DirToVect3(Direction.none);
+                dirMove.dir = Direction.none;
             }
 
         }
@@ -236,6 +353,11 @@ public class Movement : MonoBehaviour
             else
                 dirMove.pos[2] = true;
 
+            if (Array.Exists(blockableChar, x => x == accesArea[0, 1]))
+                dirMove.pos[3] = false;
+            else
+                dirMove.pos[3] = true;
+
             int inx = WayIndex(dirMove.pos);
 
             if (inx == 0)
@@ -253,10 +375,15 @@ public class Movement : MonoBehaviour
                 dirMove.move = DirToVect3(Direction.right);
                 dirMove.dir = Direction.right;
             }
-            else
+            else if (inx == 3)
             {
                 dirMove.move = DirToVect3(Direction.up);
                 dirMove.dir = Direction.up;
+            }
+            else
+            {
+                dirMove.move = DirToVect3(Direction.none);
+                dirMove.dir = Direction.none;
             }
 
 
@@ -279,6 +406,11 @@ public class Movement : MonoBehaviour
             else
                 dirMove.pos[2] = true;
 
+            if (Array.Exists(blockableChar, x => x == accesArea[2, 1]))
+                dirMove.pos[3] = false;
+            else
+                dirMove.pos[3] = true;
+
             int inx = WayIndex(dirMove.pos);
 
             if (inx == 0)
@@ -296,10 +428,15 @@ public class Movement : MonoBehaviour
                 dirMove.move = DirToVect3(Direction.right);
                 dirMove.dir = Direction.right;
             }
-            else
+            else if(inx == 3)
             {
                 dirMove.move = DirToVect3(Direction.down);
                 dirMove.dir = Direction.down;
+            }
+            else
+            {
+                dirMove.move = DirToVect3(Direction.none);
+                dirMove.dir = Direction.none;
             }
 
         }
@@ -321,6 +458,11 @@ public class Movement : MonoBehaviour
             else
                 dirMove.pos[2] = true;
 
+            if (Array.Exists(blockableChar, x => x == accesArea[1, 2]))
+                dirMove.pos[3] = false;
+            else
+                dirMove.pos[3] = true;
+
             int inx = WayIndex(dirMove.pos);
 
             if (inx == 0)
@@ -338,11 +480,24 @@ public class Movement : MonoBehaviour
                 dirMove.move = DirToVect3(Direction.up);
                 dirMove.dir = Direction.up;
             }
-            else
+            else if(inx == 3)
             {
                 dirMove.move = DirToVect3(Direction.right);
                 dirMove.dir = Direction.right;
             }
+            else
+            {
+                dirMove.move = DirToVect3(Direction.none);
+                dirMove.dir = Direction.none;
+            }
+        }
+
+        //NONE
+        else if (dirMove.dir == Direction.none)
+        {
+            int rnd = UnityEngine.Random.Range(1, 4);
+            dirMove.dir = (Direction)rnd;
+            ChooseWay(accesArea); 
         }
     }
 
@@ -363,7 +518,8 @@ public class Movement : MonoBehaviour
             return new Vector3(1f, 0f, 0f);
         else if (direction == Direction.right)
             return new Vector3(0f, 0f, 1f);
-        else return new Vector3(0f, 0f, 0f);
+        else 
+            return new Vector3(0f, 0f, 0f);
     }
     /// <summary>
     /// Move method.
@@ -391,7 +547,7 @@ public class Movement : MonoBehaviour
         public DirMove(Direction dir)
         {
             this.dir = dir;
-            this.pos = new bool[3];
+            this.pos = new bool[4];
             move = DirToVect3(Direction.none);
         }
     }
@@ -410,14 +566,14 @@ public class Movement : MonoBehaviour
         }
 
         log += $"Dir = {dirMove.dir.ToString()}\n";
-        log += $"X = {arrayPozX} Z = {arrayPozZ}\n";
-        log += $"What is on postion = {ArrayModify.TypeField(Spawner.Instance.GenerateMap, arrayPozX, arrayPozZ)}\n";
+        log += $"X = {arrayPozX} Z = {arrayPozY}\n";
+        log += $"object iteration = {iterationOfObject}\n";
         log += $"Real position = {transform.position.x}, {transform.position.z}";
         return log;
     }
     public void PrintTxtLogs()
     {
-        logWritter.ReadMapArray2D(Spawner.Instance.GenerateMap, iteration.ToString());
-        logWritter.ThrowLogToFile(iteration.ToString(), OldLog());
+        logWritter.ReadMapArray2D(Spawner.Instance.GenerateMap, globalIteration.ToString());
+        logWritter.ThrowLogToFile(globalIteration.ToString(), OldLog());
     }
 }

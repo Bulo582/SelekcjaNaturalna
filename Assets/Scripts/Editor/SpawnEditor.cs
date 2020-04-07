@@ -14,7 +14,7 @@ public class SpawnEditor : Editor
 
         if(DrawDefaultInspector())
         {
-
+            sv.MyUpdate();
         }
 
         if (GUILayout.Button("Generate"))
@@ -25,12 +25,7 @@ public class SpawnEditor : Editor
                 var generator = GameObject.Find("MapGenerator");
                 generator.GetComponent<MapGenerator>().DrawMapInEditor();
             }
-            Spawner.InstanceCreator(MeshGenerator.HeightMap, MapGenerator.MapHeight, MapGenerator.MapWidth, MapGenerator.Regions);
-            Spawner.Instance.SpawnRabbits(sv.rabbitStartCount);
-            //Spawner.Instance.SpawnFoxes(sv.foxesStartCount);
-            Spawner.Instance.SpawnCarrots(sv.carrotSpawnCound);
-            Spawner.Instance.SpawnTrees(sv.treeCount);
-            ArrayToTxt.StaticReadMapArray2D(Spawner.Instance.GenerateMap);
+            Generate.Generating();
         }
         if (GUILayout.Button("Clear"))
         {
@@ -50,7 +45,7 @@ public class SpawnEditor : Editor
                     var generator = GameObject.Find("MapGenerator");
                     generator.GetComponent<MapGenerator>().DrawMapInEditor();
                 }
-                Spawner.InstanceCreator(MeshGenerator.HeightMap, MapGenerator.MapHeight, MapGenerator.MapWidth, MapGenerator.Regions);
+                Spawner.InstanceCreator(MeshGenerator.HeightMap, MapGenerator.MapSize, MapGenerator.MapSize, MapGenerator.Regions);
                 Spawner.Instance.DeleteCarrotsSpawn();
                 Spawner.Instance.DeleteCarrots();
                 Spawner.Instance.DeleteFoxes();

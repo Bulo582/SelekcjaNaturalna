@@ -72,8 +72,16 @@ public class ArrayToTxt
         }
         return array;
     }
-    public static void HeightToFile(float[,] heightMap, string alias = "",string format = "F4")
+    public static void HeightToFile(float[,] heightMap, string alias = "",string format = "F4", bool MapMode = false)
     {
+        heightMap = ArrayModify.RewriteLastXYOneBefore(heightMap);
+        if(MapMode)
+        {
+            heightMap = ArrayModify.ArrayReverseY(heightMap);
+            //heightMap = ArrayModify.ArrayCutXY(heightMap);
+            heightMap = ArrayModify.ArrayReverseX(heightMap);
+            heightMap = ArrayModify.ArrayReverseY(heightMap);
+        }
         if(Do)
         {
             string filePath = Path.Combine(path, $"floatArray2D{alias}.txt");

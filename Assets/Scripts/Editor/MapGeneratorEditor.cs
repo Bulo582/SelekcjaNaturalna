@@ -28,18 +28,22 @@ public class MapGeneratorEditor : Editor
             {
                 var generator = GameObject.Find("MapGenerator");
                 generator.GetComponent<MapGenerator>().DrawMapInEditor();
+                
             }
-            try
+            Generate.Generating();
+            Spawner.InstanceCreator(MeshGenerator.HeightMap, MapGenerator.MapSize, MapGenerator.MapSize, MapGenerator.Regions);
+            Spawner.Instance.DeleteCarrotsSpawn();
+            Spawner.Instance.DeleteCarrots();
+            Spawner.Instance.DeleteFoxes();
+            Spawner.Instance.DeleteRabbits();
+            Spawner.Instance.DeleteTree();
+            if (Spawner.Instance.GenerateMap != null)
             {
-                if (Spawner.Instance.GenerateMap != null)
-                {
-                    ArrayToTxt.StaticReadMapArray2D(Spawner.Instance.GenerateMap);
-                }
+                ArrayToTxt.StaticReadMapArray2D(Spawner.Instance.GenerateMap);
+                //ArrayToTxt.HeightToFile(MeshGenerator.HeightMap, "Before2", "F3",false);
+                //ArrayToTxt.HeightToFile(MeshGenerator.HeightMap, "AfterOperation", "F3",false);
             }
-            catch (NullReferenceException)
-            {
-                Debug.LogError("Generate population first!");
-            }
+
         }
     }
 }

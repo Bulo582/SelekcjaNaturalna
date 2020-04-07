@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
 {
-    public static int MapHeight;
-    public static int MapWidth;
+    public static int MapSize;
     public static TerrainType[] Regions;
     public enum DrawMode
     {
@@ -39,8 +38,9 @@ public class MapGenerator : MonoBehaviour
 
     public void DrawMapInEditor()
     {
-        MapHeight = mapHeight;
-        MapWidth = mapWidth;
+        if (mapSize % 2 != 0)
+            mapSize--;
+        MapSize = mapSize;
         MapData mapData = GenerateMapData();
         Regions = regions;
         MapDisplay display = FindObjectOfType<MapDisplay>();
@@ -55,6 +55,7 @@ public class MapGenerator : MonoBehaviour
     public MapData GenerateMapData()
     {
         float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistance, lacunarity, offset);
+        noiseMap = ArrayModify.RewriteLastXYOneBefore(noiseMap);
         Color[] colourMap = new Color[mapHeight * mapWidth];
         for (int y = 0; y < mapHeight; y++)
         {

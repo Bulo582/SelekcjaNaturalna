@@ -19,7 +19,6 @@ public class RabbitLife : MonoBehaviour
     void Start()
     {
         Name = this.gameObject.name;
-        getNameNumber = GetNameNumber;
         this.gameObject.GetComponent<Renderer>().material.color = FamilyRabbit.color;
         reproductionPoint = StartRabbit.Manager.hunger;
     }

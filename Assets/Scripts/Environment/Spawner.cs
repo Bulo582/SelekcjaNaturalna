@@ -119,9 +119,11 @@ public class Spawner : MonoBehaviour
     }
     public void SpawnChildOfRabbit(int x, int y, FamilyRabbit familyRabbit)
     {
+       
         GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + x, 0.3f, y - halfHeightMap), Quaternion.identity) as GameObject;
         rabbit.GetComponent<RabbitLife>().FamilyRabbit = familyRabbit;
-        rabbit.name = $"Rabbit_{++Generate.RabbitPopSum}";
+        rabbit.GetComponent<RabbitLife>().getNameNumber = ++Generate.RabbitPopSum;
+        rabbit.name = $"Rabbit_{++Generate.generation}";
         rabbit.transform.parent = GameObject.Find("Rabbits").transform;
         generateMap[x, y] = 'R';
     }
@@ -151,11 +153,13 @@ public class Spawner : MonoBehaviour
                         {
                             if (familyRabbit[rabbitIndex].startPop > 0)
                             {
+                                Generate.generation++;
                                 indexName++;
                                 GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + i, 0.3f, j - halfHeightMap), Quaternion.identity) as GameObject;
                                 familyRabbit[rabbitIndex].startPop--;
                                 rabbit.GetComponent<RabbitLife>().FamilyRabbit = familyRabbit[rabbitIndex];
                                 rabbit.name = $"Rabbit_{indexName}";
+                                rabbit.GetComponent<RabbitLife>().getNameNumber = indexName;
                                 rabbit.transform.parent = GameObject.Find("Rabbits").transform;
                                 generateMap[i, j] = 'R';
                                 generated++;

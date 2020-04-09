@@ -9,6 +9,7 @@ public class Generate : MonoBehaviour
     public static StartValues sv;
     public static int RabbitPopSum;
     public static int freeFields;
+     public static int generation = 0;
     void Awake()
     {
         Generating();

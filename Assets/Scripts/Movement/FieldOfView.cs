@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class FieldOfView : MonoBehaviour
@@ -46,7 +47,11 @@ public class FieldOfView : MonoBehaviour
                 }
             }
         }
+        visibleTargets = visibleTargets.OrderBy(target => Vector3.Distance(transform.position, target.transform.position)).ToList();
     }
+
+
+
     public Vector3 DirFromAngle(float angleInDegrees, bool angleIsGlobal)
     {
         if(!angleIsGlobal)

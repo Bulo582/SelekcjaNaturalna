@@ -181,7 +181,7 @@ public class Movement : MonoBehaviour
         populationReady = false;
         if (numberOfPerson == Generate.RabbitPopSum)
             globalIteration++;
-
+        
     }
     public IEnumerator CoordinatePopulation()
     {
@@ -281,7 +281,7 @@ public class Movement : MonoBehaviour
     /// Change MoveDir struct
     /// </summary>
     /// <param name="accesArea"></param>
-    public void ChooseWay(char[,] accesArea)
+    public void ChooseWay(char[,] accesArea) // dirMove można usunąć
     {
         // RIGHT 
         if (dirMove.dir == Direction.right)

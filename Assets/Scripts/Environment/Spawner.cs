@@ -20,6 +20,7 @@ public class Spawner : MonoBehaviour
     FamilyRabbit[] familyRabbit;
     int RabbitPopulationSum;
     readonly int maxRange;
+    public static readonly float rabbitY = 0.3f;
 
     public readonly char[,] originalMap;
 
@@ -31,7 +32,7 @@ public class Spawner : MonoBehaviour
         }
         set
         {
-            value = this.generateMap;
+            this.generateMap = value;
         }
     }
 
@@ -106,26 +107,29 @@ public class Spawner : MonoBehaviour
     {
         int rabbitX = 1;
         int rabbitY = 2;
-        GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + rabbitX, 0.3f, rabbitY - halfHeightMap), Quaternion.identity) as GameObject;
+        GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + rabbitX, rabbitY, rabbitY - halfHeightMap), Quaternion.identity) as GameObject;
         rabbit.name = "Rabbit" + rabbitIndex;
         rabbit.transform.parent = GameObject.Find("Rabbits").transform;
         generateMap[rabbitX, rabbitY] = 'R';
 
         int carrotX = 7;
         int carrotY = 3;
-        GameObject carriot = Instantiate(carrotPrefab, new Vector3(halfWidthMap + carrotX, 0.2f, carrotY - halfHeightMap), Quaternion.identity) as GameObject;
+        GameObject carriot = Instantiate(carrotPrefab, new Vector3(halfWidthMap + carrotX, rabbitY, carrotY - halfHeightMap), Quaternion.identity) as GameObject;
         carriot.transform.parent = GameObject.Find("Carrots").transform;
         generateMap[carrotX, carrotY] = 'C';
     }
     public void SpawnChildOfRabbit(int x, int y, FamilyRabbit familyRabbit)
     {
        
-        GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + x, 0.3f, y - halfHeightMap), Quaternion.identity) as GameObject;
+        GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + x, rabbitY, y - halfHeightMap), Quaternion.identity) as GameObject;
         rabbit.GetComponent<RabbitLife>().FamilyRabbit = familyRabbit;
         rabbit.GetComponent<RabbitLife>().getNameNumber = ++Generate.RabbitPopSum;
         rabbit.name = $"Rabbit_{++Generate.generation}";
         rabbit.transform.parent = GameObject.Find("Rabbits").transform;
+        rabbit.GetComponent<Movement>().ready = true;
+        rabbit.GetComponent<Movement>().populationReady = true;
         generateMap[x, y] = 'R';
+        Logger.PrintLog($"{rabbit.name} Born -- populationReady {MovementController.IsReady()}");
     }
     public void SpawnRabbits(int count)
     {
@@ -139,7 +143,7 @@ public class Spawner : MonoBehaviour
             if (count >= generateMap.Length)
                 break;
             breakout++;
-            if (breakout > MapGenerator.MapSize)
+            if (breakout > maxRange)
                 generated = breakout;
 
             for (int i = 0; i < generateMap.GetLength(0); i++)
@@ -155,7 +159,7 @@ public class Spawner : MonoBehaviour
                             {
                                 Generate.generation++;
                                 indexName++;
-                                GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + i, 0.3f, j - halfHeightMap), Quaternion.identity) as GameObject;
+                                GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + i, rabbitY, j - halfHeightMap), Quaternion.identity) as GameObject;
                                 familyRabbit[rabbitIndex].startPop--;
                                 rabbit.GetComponent<RabbitLife>().FamilyRabbit = familyRabbit[rabbitIndex];
                                 rabbit.name = $"Rabbit_{indexName}";

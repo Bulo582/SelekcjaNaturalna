@@ -5,7 +5,19 @@ using UnityEngine;
 
 public class CarrotSpawn : MonoBehaviour
 {
-    public int iterationOnDead;
+    int arrayPozX;
+    int arrayPozY;
+    int iterationOnDead;
+
+    public int IterationOnDead
+    {
+        get {return this.iterationOnDead; }
+        set 
+        { 
+            iterationOnDead = value;
+            Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = Spawner.Instance.originalMap[arrayPozX, arrayPozY];
+        }
+    }
     public int iterationToRespawn;
     public int IterationOnRespawn
     {
@@ -15,6 +27,8 @@ public class CarrotSpawn : MonoBehaviour
     private void Start()
     {
         iterationToRespawn = StartCarrot.Manager.iterationToRespawn;
+        arrayPozX = MapHelper.TransormX_ToMapX(this.transform.position.x);
+        arrayPozY = MapHelper.TransormZ_ToMapY(this.transform.position.z);
     }
     void Update()
     {
@@ -24,6 +38,9 @@ public class CarrotSpawn : MonoBehaviour
             {
                 this.gameObject.transform.position = Spawner.GetLegalVector3();
                 this.gameObject.transform.GetChild(0).gameObject.SetActive(true);
+                arrayPozX = MapHelper.TransormX_ToMapX(transform.position.x);
+                arrayPozY = MapHelper.TransormZ_ToMapY(transform.position.z);
+                Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = StartCarrot.sign;
             }
         }
     }

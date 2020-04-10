@@ -26,8 +26,8 @@ public class Movement : MonoBehaviour
         }
     }
     internal bool ready = false;
-    private bool populationReady = false;
-    private bool canMakeWay;
+    public bool populationReady = false;
+    public bool canMakeWay;
     public static int globalIteration = 0;
     public int iterationOfObject = 0;
 
@@ -59,7 +59,7 @@ public class Movement : MonoBehaviour
         actualPosition = this.gameObject.transform.position;
         arrayPozX = MapHelper.TransormX_ToMapX(actualPosition.x);
         arrayPozY = MapHelper.TransormZ_ToMapY(actualPosition.z);
-        dirMove = new DirMove(Direction.right);
+        dirMove = new DirMove(Direction.none);
         accesArea = ArrayModify.CircleOut(Spawner.Instance.GenerateMap, arrayPozX, arrayPozY, 1);
         MovementController.Creatures.Add(this);
         canMakeWay = true;
@@ -72,7 +72,6 @@ public class Movement : MonoBehaviour
         if (currentNumberMove == this.numberOfPerson && ready == false)
         {
             DecideWhatToDo();
-            
         }
 
         if (populationReady)
@@ -104,6 +103,7 @@ public class Movement : MonoBehaviour
     }
     public void ToTargetMove() 
     {
+        bool ate = false;
         NoEatIterationDie++;
         iterationOfObject++;
 
@@ -111,6 +111,7 @@ public class Movement : MonoBehaviour
         {
             Generate.RabbitPopSum--;
             MovementController.Creatures.Remove(this);
+            Logger.PrintLog($"{this.gameObject.name} - Die");
             Destroy(this.gameObject);
             Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = Spawner.Instance.originalMap[arrayPozX, arrayPozY];
             MovementController.NumeringPopulation();
@@ -134,15 +135,17 @@ public class Movement : MonoBehaviour
                 DirToArrayPoz();
                 PrintTxtLogs();
                 fow.visibleTargets.Clear();
-                target.gameObject.GetComponentInParent<CarrotSpawn>().iterationOnDead = globalIteration;
+                target.gameObject.GetComponentInParent<CarrotSpawn>().IterationOnDead = globalIteration;
                 this.gameObject.transform.LookAt(target);
                 target.gameObject.SetActive(false);
                 rabbitLife.Meal();
                 NoEatIterationDie = 0;
+                ate = true;
             }
             ready = true;
             canMakeWay = false;
             currentNumberMove++;
+            Logger.PrintLog($"{this.gameObject.name} - TargetMove meal = {ate}");
             StartCoroutine("CoordinatePopulation");
         }
     }
@@ -150,6 +153,7 @@ public class Movement : MonoBehaviour
     {
         NoEatIterationDie++;
         iterationOfObject++;
+
         if (NoEatIterationDie >= dietIteration)
         {
             Generate.RabbitPopSum--;
@@ -167,20 +171,21 @@ public class Movement : MonoBehaviour
             ready = true;
             canMakeWay = false;
             currentNumberMove++;
+            Logger.PrintLog($"{this.gameObject.name} - RandomMove");
             StartCoroutine("CoordinatePopulation");
         }
     }
     // dir jednek kierunek inny sprawdz przy jednem osobniku
     public void Move()
     {
-        MoveObject(dirMove.dir);
+        GetComponent<SmothMove>().SwitchOnMove(dirMove.dir);
+        //MoveObject(dirMove.dir);
         TurnObject(dirMove.dir);
         currentMovementCooldown = 0;
-        ready = false;
-        canMakeWay = true;
         populationReady = false;
-        if (numberOfPerson == Generate.RabbitPopSum)
-            globalIteration++;
+        // do smoothMove
+        //if (numberOfPerson == Generate.RabbitPopSum)
+            //globalIteration++;
         
     }
     public IEnumerator CoordinatePopulation()

@@ -5,7 +5,7 @@ using UnityEngine;
 public class StartCarrot : MonoBehaviour
 {
     public int iterationToRespawn = 5;
-
+    public static readonly char sign = 'C';
     private static StartCarrot manager = null;
 
     public static StartCarrot Manager

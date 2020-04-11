@@ -11,7 +11,7 @@ public enum Direction
     left = 4,
     none = 5
 }
-public class MovementController 
+public class MovementController // Population Controller
 {
     public static List<Movement> Creatures = new List<Movement>();
     public static bool IsReady()
@@ -22,7 +22,6 @@ public class MovementController
     {
         return Creatures.All(l => l.ready == false);
     }
-
     public static void NumeringPopulation()
     {
         if (Creatures != null)
@@ -30,7 +29,7 @@ public class MovementController
             int idx = 1;
             foreach (var item in Creatures)
             {
-                item.rabbitLife.getNameNumber = idx;
+                item.rabbitLife.rabbitID = idx;
                 idx++;
             }
         }

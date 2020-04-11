@@ -12,9 +12,6 @@ public static class MeshGenerator
     {
         HeightMap = heightMap;
         noiseMap = heightMap;
-        //noiseMap = ArrayToTxt.HeightRound(heightMap, regions);
-        //ArrayToTxt.HeightToFile(noiseMap, "C", "F1");
-        //noiseMap = ArrayToTxt.LoadHeightFromFile("floatArray2DC.txt");
         int wight = heightMap.GetLength(0);
         int height = heightMap.GetLength(1);
         float topLeftX = (wight - 1) / -2f;

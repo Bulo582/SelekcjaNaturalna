@@ -1,10 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using UnityEngine;
+
 
 public class FileHelper 
 {
+    public static string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+    public static readonly string testFolder = Path.Combine(desktop, "TestLand");
+
     public static void DeleteAllFiles(string path)
     {
         DirectoryInfo di = new DirectoryInfo(path);

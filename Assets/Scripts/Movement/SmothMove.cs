@@ -8,32 +8,33 @@ public class SmothMove : MonoBehaviour
     Vector3 target;
     Direction dir = Direction.none;
 
-    float timeToReachTarget = 1f;
+    static readonly float timeToReachTarget = 1f;
     float time;
     bool move = false;
-    int numebrOfPerson;
+    int numebrOfPerson => movement.numberOfPerson;
 
-    Vector2 simulationTarget = new Vector2(0,1);
-    Vector2 simulationSeeker = new Vector2(0, 0);
+    Vector2 simulatedTarget = new Vector2(0, 1);
+    Vector2 simulatedSeeker = new Vector2(0, 0);
+
+    static Vector2 globalSimulatedTarget = new Vector2(0, 1);
+    static Vector2 globalSimulatedSeeker = new Vector2(0, 0);
     private void Start()
     {
-        numebrOfPerson = GetComponent<RabbitLife>().getNameNumber;
         movement = GetComponent<Movement>();
     }
     void FixedUpdate()
     {
         if(move)
         {
-            SmothDirectionShift();
+            SmoothDirectionMove();
         }
     }
 
-    public void SmothDirectionShift()
+    void SmoothDirectionMove()
     {
         
         if (dir != Direction.none)
         {
-            float test = Vector3.Distance(transform.position, target); // delete
             if (Vector3.Distance(transform.position, target) > 0.1f)
             {
                 time += Time.deltaTime / timeToReachTarget;
@@ -42,39 +43,41 @@ public class SmothMove : MonoBehaviour
             else
             {
                 time = 0;
-                transform.position = target;
+                this.transform.position = target;
                 movement.ready = false;
                 movement.canMakeWay = true;
                 move = false;
-                Logger.PrintLog($"{this.gameObject.name} - Smooth Dir.{dir.ToString()}");
-                if (numebrOfPerson== Generate.RabbitPopSum)
+                GameManager.logger.PrintLog($"{this.gameObject.name} - Smooth Dir.{dir.ToString()}");
+                if (numebrOfPerson == Generate.rabbitPopSum)
+                {
                     Movement.globalIteration++;
+                }
+
             }
         }
         else
         {
             // simulation move for get the same time like on move 
-            if (Vector2.Distance(simulationSeeker,simulationTarget) > 0.1f)
+            if (Vector2.Distance(simulatedSeeker,simulatedTarget) > 0.1f)
             {
                 time += (Time.deltaTime / timeToReachTarget);
-                simulationSeeker = Vector2.Lerp(simulationSeeker, simulationTarget, time);
-                float check = Vector2.Distance(simulationSeeker, simulationTarget);
+                simulatedSeeker = Vector2.Lerp(simulatedSeeker, simulatedTarget, time);
             }
             else
             {
                 time = 0;
-                simulationSeeker.Set(0, 0);
-                transform.position = target;
+                simulatedSeeker.Set(0, 0);
                 movement.ready = false;
                 movement.canMakeWay = true;
                 move = false;
-                Logger.PrintLog($"{this.gameObject.name} - Smooth Dir.none");
-                if (numebrOfPerson == Generate.RabbitPopSum)
+                GameManager.logger.PrintLog($"{this.gameObject.name} - Smooth Dir.none");
+                if (numebrOfPerson == Generate.rabbitPopSum)
+                {
                     Movement.globalIteration++;
+                }
             }
         }
     }
-
     public void SwitchOnMove(Direction dir)
     {
         target = transform.localPosition + DirToVect3(dir);
@@ -82,8 +85,7 @@ public class SmothMove : MonoBehaviour
         this.dir = dir;
         
     }
-
-    public  Vector3 DirToVect3(Direction direction)
+    public static Vector3 DirToVect3(Direction direction)
     {
         if (direction == Direction.up)
             return new Vector3(-1f, 0f, 0f);
@@ -95,5 +97,22 @@ public class SmothMove : MonoBehaviour
             return new Vector3(0f, 0f, 1f);
         else
             return new Vector3(0f, 0f, 0f);
+    }
+
+    public static void SimulationMove(ref float time) // for FixedUpadate
+    {
+        // simulation move for get the same time like on move 
+        if (Vector2.Distance(globalSimulatedSeeker, globalSimulatedTarget) > 0.1f)
+        {
+            time += (Time.deltaTime / timeToReachTarget);
+            globalSimulatedSeeker = Vector2.Lerp(globalSimulatedSeeker, globalSimulatedTarget, time);
+        }
+        else
+        {
+            time = 0;
+            KeepSimulation.simulationMovementCooldown = 0;
+            globalSimulatedSeeker.Set(0, 0);
+            Movement.globalIteration++;
+        }
     }
 }

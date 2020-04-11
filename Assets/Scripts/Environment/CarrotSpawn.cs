@@ -8,7 +8,6 @@ public class CarrotSpawn : MonoBehaviour
     int arrayPozX;
     int arrayPozY;
     int iterationOnDead;
-
     public int IterationOnDead
     {
         get {return this.iterationOnDead; }
@@ -30,11 +29,11 @@ public class CarrotSpawn : MonoBehaviour
         arrayPozX = MapHelper.TransormX_ToMapX(this.transform.position.x);
         arrayPozY = MapHelper.TransormZ_ToMapY(this.transform.position.z);
     }
-    void Update()
+    void FixedUpdate()
     {
         if(!this.gameObject.transform.GetChild(0).gameObject.activeSelf)
         {
-            if (IterationOnRespawn == Movement.globalIteration)
+            if (IterationOnRespawn <= Movement.globalIteration)
             {
                 this.gameObject.transform.position = Spawner.GetLegalVector3();
                 this.gameObject.transform.GetChild(0).gameObject.SetActive(true);

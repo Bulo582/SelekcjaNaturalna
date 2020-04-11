@@ -26,9 +26,9 @@ public class StartValues : MonoBehaviour
         for (int i = 0; i < familyRabbits.Length; i++)
         {
             familyPopSum += familyRabbits[i].startPop;
-            if (System.String.IsNullOrEmpty(familyRabbits[i].FamilyName))
+            if (System.String.IsNullOrEmpty(familyRabbits[i].familyName))
             {
-                familyRabbits[i].FamilyName = $"Family_{i}";
+                familyRabbits[i].familyName = $"Family_{i+1}";
                 familyRabbits[i].color = defaultColor;
                 familyRabbits[i].startPop = 1;
             }

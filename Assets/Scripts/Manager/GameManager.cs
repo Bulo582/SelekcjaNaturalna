@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+public class GameManager
 {
+    public static Logger logger = new Logger();
+    public static MapToTxt mapToTXTprinter = new MapToTxt("Map");
     public static void StopGame()
     {
         Time.timeScale = 0;

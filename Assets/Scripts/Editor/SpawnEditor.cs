@@ -19,7 +19,7 @@ public class SpawnEditor : Editor
 
         if (GUILayout.Button("Generate"))
         {
-            ArrayToTxt.Do = true;
+            MapToTxt.Do = true;
             if (MeshGenerator.HeightMap == null)
             {
                 var generator = GameObject.Find("MapGenerator");
@@ -39,7 +39,7 @@ public class SpawnEditor : Editor
             }
             catch(NullReferenceException)
             {
-                ArrayToTxt.Do = false;
+                MapToTxt.Do = false;
                 if (MeshGenerator.HeightMap == null)
                 {
                     var generator = GameObject.Find("MapGenerator");

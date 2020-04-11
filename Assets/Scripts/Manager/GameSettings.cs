@@ -4,43 +4,51 @@ using UnityEngine;
 
 public class GameSettings : MonoBehaviour
 {
-    public bool autoUpdate
-    {
-        get { return true; }
-    }
-
     [Range(0, 10)]
     public float timeSpeed = 1;
     public bool DoTXT = true;
 
+    public bool debugMode = true;
+    public bool loggerMode = false;
+
+    public bool autoUpdate
+    {
+        get { return true; }
+    }
     private void Start()
     {
         SetTime();
         SetDoTXT();
+        SetDebugMode();
+        SetLoggerMode();
     }
-
     private void Awake()
     {
         DeleteAllTestFile();
         DeleteAllTestFolders();
     }
-
     public void SetTime()
     {
         Time.timeScale = timeSpeed;
     }
     public void SetDoTXT()
     {
-        ArrayToTxt.Do = DoTXT;
+        MapToTxt.Do = DoTXT;
     }
-
+    public void SetDebugMode()
+    {
+        GetComponent<KeepSimulation>().debugMode = debugMode;
+    }
+    public void SetLoggerMode()
+    {
+        GameManager.logger.canLog = loggerMode;
+    }
     public void DeleteAllTestFile()
     {
-        FileHelper.DeleteAllFiles(ArrayToTxt.TestFolder);
+        FileHelper.DeleteAllFiles(FileHelper.testFolder);
     }
-
     public void DeleteAllTestFolders()
     {
-        FileHelper.DeleteAllFolders(ArrayToTxt.TestFolder);
+        FileHelper.DeleteAllFolders(FileHelper.testFolder);
     }
 }

@@ -18,12 +18,12 @@ public class MapGeneratorEditor : Editor
         }
         if(GUILayout.Button("Generate"))
         {
-            ArrayToTxt.Do = false;
+            MapToTxt.Do = false;
             mapGen.DrawMapInEditor();
         }
         if(GUILayout.Button("TXT"))
         {
-            ArrayToTxt.Do = true;
+            MapToTxt.Do = true;
             if (MeshGenerator.HeightMap == null)
             {
                 var generator = GameObject.Find("MapGenerator");
@@ -39,7 +39,7 @@ public class MapGeneratorEditor : Editor
             Spawner.Instance.DeleteTree();
             if (Spawner.Instance.GenerateMap != null)
             {
-                ArrayToTxt.StaticReadMapArray2D(Spawner.Instance.GenerateMap);
+                GameManager.mapToTXTprinter.StaticReadMapArray2D(Spawner.Instance.GenerateMap);
                 //ArrayToTxt.HeightToFile(MeshGenerator.HeightMap, "Before2", "F3",false);
                 //ArrayToTxt.HeightToFile(MeshGenerator.HeightMap, "AfterOperation", "F3",false);
             }

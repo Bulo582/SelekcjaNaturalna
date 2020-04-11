@@ -15,6 +15,8 @@ public class GameSettingsEditor : Editor
             {
                 gameSet.SetTime();
                 gameSet.SetDoTXT();
+                gameSet.SetDebugMode();
+                gameSet.SetLoggerMode();
             }
         }
     }

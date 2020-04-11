@@ -6,23 +6,15 @@ using UnityEngine;
 
 public class RabbitLife : MonoBehaviour
 {
-    int eaten = 0;
-    public string Name;
-    public int getNameNumber;
-    public Spawner.FamilyRabbit FamilyRabbit;
-    private int reproductionPoint;
-    int x;
-    int y;
-    public int Hunger;
+    public int rabbitID; // identify rabbit in Iteration Module ..// this variable getting of value from meth. NumeringPopulation()
+    internal Spawner.FamilyRabbit FamilyRabbit; // membership of group...
+    int eaten = 0; // sum carrots which the rabbit eaten in whole our life 
+    string Name; // name of current rabbit
+    int reproductionPoint; // count carrot to division
+    int Hunger; // counter that how eaten carrot before divison
 
-
-    void Start()
-    {
-        Name = this.gameObject.name;
-        this.gameObject.GetComponent<Renderer>().material.color = FamilyRabbit.color;
-        reproductionPoint = StartRabbit.Manager.hunger;
-    }
-
+    int arrayPosX;
+    int arrayPosY;
     public int GetNameNumber
     {
         get
@@ -31,7 +23,12 @@ public class RabbitLife : MonoBehaviour
             return result;
         }
     }
-
+    void Start()
+    {
+        Name = this.gameObject.name;
+        this.gameObject.GetComponent<Renderer>().material.color = FamilyRabbit.color;
+        reproductionPoint = StartRabbit.Manager.hunger;
+    }
     public void Meal()
     {
         Hunger++;
@@ -39,7 +36,12 @@ public class RabbitLife : MonoBehaviour
         if (Hunger >= reproductionPoint)
             Division();
     }
-
+    /// <summary>
+    /// returns random, possible to acces way
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="way"></param>
     public void TakeFreeWay(int x, int y, out Way way)
     {
         way = new Way();
@@ -113,6 +115,12 @@ public class RabbitLife : MonoBehaviour
             }
         }
     }
+    /// <summary>
+    /// change the main position parameter through seleced way
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="way"></param>
     public void CoordinateChange(ref int x, ref int y, Way way)
     {
         if(way.dir == Direction.up)
@@ -132,34 +140,33 @@ public class RabbitLife : MonoBehaviour
             y--;
         }
     }
-
+    /// <summary>
+    /// Born new little sweet rabbit. TakeFreeWay and CoordinateChange must be call before.
+    /// </summary>
     public void Division()
      {
         eaten += Hunger;
         Hunger = 0;
-        x = MapHelper.TransormX_ToMapX(this.transform.position.x);
-        y = MapHelper.TransormZ_ToMapY(this.transform.position.z);
-        TakeFreeWay(x, y, out Way way);
-        CoordinateChange(ref x, ref y, way);
+        arrayPosX = MapHelper.TransormX_ToMapX(this.transform.position.x);
+        arrayPosY = MapHelper.TransormZ_ToMapY(this.transform.position.z);
+        TakeFreeWay(arrayPosX, arrayPosY, out Way way);
+        CoordinateChange(ref arrayPosX, ref arrayPosY, way);
         StartCoroutine("WaitForLastPerson");
     }
-
     IEnumerator WaitForLastPerson()
     {
         yield return new WaitWhile(() => MovementController.IsReady() == true);
-        Spawner.Instance.SpawnChildOfRabbit(x, y, FamilyRabbit);
-        if (Generate.freeFields == Generate.RabbitPopSum - 1)
+        Spawner.Instance.SpawnChildOfRabbit(arrayPosX, arrayPosY, FamilyRabbit);
+        if (Generate.freeFields == Generate.rabbitPopSum - 1)
         {
             Time.timeScale = 0;
             Debug.Log("Finish - Map is full");
         }
     }
-
     public struct Way
     {
         public Direction dir;
         public int idx;
         public bool isOpen;
     }
-
 }

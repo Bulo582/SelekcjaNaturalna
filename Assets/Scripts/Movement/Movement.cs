@@ -4,9 +4,15 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Movement : MonoBehaviour
+public class Movement : MonoBehaviour // Iteration Module
 {
-    private int antiBug;
+    // var for know where i am 
+    static int currentNumberMove = 1;
+    internal static int globalIteration = 0;
+    public int iterationOfObject = 0;
+    public int numberOfPerson => rabbitLife.rabbitID;
+
+    // var for know what doing now
     bool HaveTarget
     {
         get
@@ -17,46 +23,38 @@ public class Movement : MonoBehaviour
                 return false;
         }
     }
-    public static int currentNumberMove = 1;
-    public int numberOfPerson 
-    { 
-        get 
-        {
-            return rabbitLife.getNameNumber;
-        }
-    }
     internal bool ready = false;
-    public bool populationReady = false;
-    public bool canMakeWay;
-    public static int globalIteration = 0;
-    public int iterationOfObject = 0;
+    internal bool populationReady = false;
+    internal bool canMakeWay;
+    DirMove dirMove;
 
+    // Var needed for die system
     int dietIteration;
-    public int NoEatIterationDie = 0;
+    public int IterationWithoutEat = 0;
 
+    // Var needed if rabbits exist
     float movementTime = 2f;
     float movementCooldownIncrease = 5f;
-    public float currentMovementCooldown = 0;
+    float currentMovementCooldown = 0;
 
-    public Vector3 actualPosition;
+    // Var needed for operation of (genetated map == array map)
+    int arrayPozX;
+    int arrayPozY;
+    char[,] accesArea;
+    internal static readonly char[] blockableChar = { 'X', 'T', 'C', 'R', 'O' };
 
-    public int arrayPozX;
-    public int arrayPozY;
-    public char[,] accesArea;
-    public static readonly char[] blockableChar = { 'X', 'T', 'C', 'R', 'O' };
-
-    DirMove dirMove;
+    //Other modules 
     FieldOfView fow;
-    public RabbitLife rabbitLife;
-    ArrayToTxt logWritter;
+    internal RabbitLife rabbitLife;
+    MapToTxt MapToTXTprinter;
     void Start()
     {
         dietIteration = StartRabbit.Manager.iterationToDie;
-        logWritter = new ArrayToTxt(this.gameObject.name);
+        MapToTXTprinter = new MapToTxt(this.gameObject.name);
         fow = GetComponent<FieldOfView>();
         rabbitLife = GetComponent<RabbitLife>();
         movementCooldownIncrease = StartRabbit.Manager.movementSpeed;
-        actualPosition = this.gameObject.transform.position;
+        Vector3 actualPosition = this.gameObject.transform.position;
         arrayPozX = MapHelper.TransormX_ToMapX(actualPosition.x);
         arrayPozY = MapHelper.TransormZ_ToMapY(actualPosition.z);
         dirMove = new DirMove(Direction.none);
@@ -67,7 +65,7 @@ public class Movement : MonoBehaviour
     }
     void FixedUpdate()
     {
-        // Dlaczego obiekty się wieszają, chyba jak umierają
+        // main of iteration module 
 
         if (currentNumberMove == this.numberOfPerson && ready == false)
         {
@@ -79,12 +77,11 @@ public class Movement : MonoBehaviour
             CooldownAndMove();
         }
 
-        if (currentNumberMove > Generate.RabbitPopSum)
+        if (currentNumberMove > Generate.rabbitPopSum)
         {
             currentNumberMove = 1;
         }
     }
-
     public void CooldownAndMove()
     {
         currentMovementCooldown += movementCooldownIncrease * Time.deltaTime;
@@ -104,17 +101,12 @@ public class Movement : MonoBehaviour
     public void ToTargetMove() 
     {
         bool ate = false;
-        NoEatIterationDie++;
+        IterationWithoutEat++;
         iterationOfObject++;
 
-        if (NoEatIterationDie >= dietIteration)
+        if (IterationWithoutEat >= dietIteration)
         {
-            Generate.RabbitPopSum--;
-            MovementController.Creatures.Remove(this);
-            Logger.PrintLog($"{this.gameObject.name} - Die");
-            Destroy(this.gameObject);
-            Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = Spawner.Instance.originalMap[arrayPozX, arrayPozY];
-            MovementController.NumeringPopulation();
+            Die();
         }
         else
         {
@@ -124,14 +116,12 @@ public class Movement : MonoBehaviour
             {
                 Node step = path.First();
                 dirMove.dir = step.dir;
-                dirMove.move = DirToVect3(dirMove.dir);
                 DirToArrayPoz();
                 PrintTxtLogs();
             }
             else
             {
                 dirMove.dir = Direction.none;
-                dirMove.move = DirToVect3(dirMove.dir);
                 DirToArrayPoz();
                 PrintTxtLogs();
                 fow.visibleTargets.Clear();
@@ -139,28 +129,24 @@ public class Movement : MonoBehaviour
                 this.gameObject.transform.LookAt(target);
                 target.gameObject.SetActive(false);
                 rabbitLife.Meal();
-                NoEatIterationDie = 0;
+                IterationWithoutEat = 0;
                 ate = true;
             }
             ready = true;
             canMakeWay = false;
             currentNumberMove++;
-            Logger.PrintLog($"{this.gameObject.name} - TargetMove meal = {ate}");
+            GameManager.logger.PrintLog($"{this.gameObject.name} - TargetMove meal = {ate}");
             StartCoroutine("CoordinatePopulation");
         }
     }
     public void RandomMove()
     {
-        NoEatIterationDie++;
+        IterationWithoutEat++;
         iterationOfObject++;
 
-        if (NoEatIterationDie >= dietIteration)
+        if (IterationWithoutEat >= dietIteration)
         {
-            Generate.RabbitPopSum--;
-            MovementController.Creatures.Remove(this);
-            Destroy(this.gameObject);
-            Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = Spawner.Instance.originalMap[arrayPozX, arrayPozY];
-            MovementController.NumeringPopulation();
+            Die();
         }
         else
         {
@@ -171,22 +157,26 @@ public class Movement : MonoBehaviour
             ready = true;
             canMakeWay = false;
             currentNumberMove++;
-            Logger.PrintLog($"{this.gameObject.name} - RandomMove");
+            GameManager.logger.PrintLog($"{this.gameObject.name} - RandomMove");
             StartCoroutine("CoordinatePopulation");
         }
     }
-    // dir jednek kierunek inny sprawdz przy jednem osobniku
-    public void Move()
+    public void Die()
+    {
+        Generate.rabbitPopSum--;
+        
+        MovementController.Creatures.Remove(this);
+        GameManager.logger.PrintLog($"{this.gameObject.name} - Die");
+        Destroy(this.gameObject);
+        Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = Spawner.Instance.originalMap[arrayPozX, arrayPozY];
+        MovementController.NumeringPopulation();
+    }
+    private void Move()
     {
         GetComponent<SmothMove>().SwitchOnMove(dirMove.dir);
-        //MoveObject(dirMove.dir);
         TurnObject(dirMove.dir);
         currentMovementCooldown = 0;
-        populationReady = false;
-        // do smoothMove
-        //if (numberOfPerson == Generate.RabbitPopSum)
-            //globalIteration++;
-        
+        populationReady = false;      
     }
     public IEnumerator CoordinatePopulation()
     {
@@ -226,12 +216,10 @@ public class Movement : MonoBehaviour
             Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = 'R';
         }
         else
-        {
-
-        }
+        { }
     }
 
-    public Direction DirectionDetect(char signToDetect )
+    public Direction DirectionDetect(char signToDetect ) // Use to chooseWay
     {
         if (signToDetect == accesArea[1, 0])
         {
@@ -314,31 +302,20 @@ public class Movement : MonoBehaviour
             int inx = WayIndex(dirMove.pos);
 
             if (inx == 0)
-            {
-                dirMove.move = DirToVect3(Direction.down);
                 dirMove.dir = Direction.down;
-            }
+           
             else if (inx == 1)
-            {
-                dirMove.move = DirToVect3(Direction.right);
                 dirMove.dir = Direction.right;
-            }
+          
             else if (inx == 2)
-            {
-                dirMove.move = DirToVect3(Direction.up);
                 dirMove.dir = Direction.up;
-            }
+          
             else if (inx == 3)
-            {
-                dirMove.move = DirToVect3(Direction.left);
                 dirMove.dir = Direction.left;
-            }
+         
             else
-            {
-                dirMove.move = DirToVect3(Direction.none);
                 dirMove.dir = Direction.none;
-            }
-
+           
         }
         // DOWN 
         else if (dirMove.dir == Direction.down)
@@ -366,31 +343,19 @@ public class Movement : MonoBehaviour
             int inx = WayIndex(dirMove.pos);
 
             if (inx == 0)
-            {
-                dirMove.move = DirToVect3(Direction.left);
                 dirMove.dir = Direction.left;
-            }
+            
             else if (inx == 1)
-            {
-                dirMove.move = DirToVect3(Direction.down);
                 dirMove.dir = Direction.down;
-            }
+           
             else if (inx == 2)
-            {
-                dirMove.move = DirToVect3(Direction.right);
                 dirMove.dir = Direction.right;
-            }
-            else if (inx == 3)
-            {
-                dirMove.move = DirToVect3(Direction.up);
-                dirMove.dir = Direction.up;
-            }
-            else
-            {
-                dirMove.move = DirToVect3(Direction.none);
-                dirMove.dir = Direction.none;
-            }
 
+            else if (inx == 3)
+                dirMove.dir = Direction.up;
+          
+            else
+                dirMove.dir = Direction.none;
 
         }
         //UP
@@ -419,31 +384,20 @@ public class Movement : MonoBehaviour
             int inx = WayIndex(dirMove.pos);
 
             if (inx == 0)
-            {
-                dirMove.move = DirToVect3(Direction.left);
                 dirMove.dir = Direction.left;
-            }
+           
             else if (inx == 1)
-            {
-                dirMove.move = DirToVect3(Direction.up);
                 dirMove.dir = Direction.up;
-            }
+           
             else if (inx == 2)
-            {
-                dirMove.move = DirToVect3(Direction.right);
                 dirMove.dir = Direction.right;
-            }
+          
             else if(inx == 3)
-            {
-                dirMove.move = DirToVect3(Direction.down);
                 dirMove.dir = Direction.down;
-            }
+            
             else
-            {
-                dirMove.move = DirToVect3(Direction.none);
                 dirMove.dir = Direction.none;
-            }
-
+            
         }
         //LEFT
         else if (dirMove.dir == Direction.left)
@@ -471,32 +425,21 @@ public class Movement : MonoBehaviour
             int inx = WayIndex(dirMove.pos);
 
             if (inx == 0)
-            {
-                dirMove.move = DirToVect3(Direction.down);
                 dirMove.dir = Direction.down;
-            }
+            
             else if (inx == 1)
-            {
-                dirMove.move = DirToVect3(Direction.left);
                 dirMove.dir = Direction.left;
-            }
+           
             else if (inx == 2)
-            {
-                dirMove.move = DirToVect3(Direction.up);
                 dirMove.dir = Direction.up;
-            }
-            else if(inx == 3)
-            {
-                dirMove.move = DirToVect3(Direction.right);
-                dirMove.dir = Direction.right;
-            }
-            else
-            {
-                dirMove.move = DirToVect3(Direction.none);
-                dirMove.dir = Direction.none;
-            }
-        }
 
+            else if(inx == 3)
+                dirMove.dir = Direction.right;
+
+            else
+                dirMove.dir = Direction.none;
+          
+        }
         //NONE
         else if (dirMove.dir == Direction.none)
         {
@@ -509,23 +452,6 @@ public class Movement : MonoBehaviour
     #endregion
 
     #region Move
-    void MoveObject(Direction dir)
-    {
-        transform.position = transform.localPosition + DirToVect3(dir);
-    }
-    public static Vector3 DirToVect3(Direction direction)
-    {
-        if (direction == Direction.up)
-            return new Vector3(-1f, 0f, 0f);
-        else if (direction == Direction.left)
-            return new Vector3(0f, 0f, -1f);
-        else if (direction == Direction.down)
-            return new Vector3(1f, 0f, 0f);
-        else if (direction == Direction.right)
-            return new Vector3(0f, 0f, 1f);
-        else 
-            return new Vector3(0f, 0f, 0f);
-    }
     /// <summary>
     /// Move method.
     /// </summary>
@@ -547,18 +473,16 @@ public class Movement : MonoBehaviour
     {
         public Direction dir;
         public bool[] pos;
-        public Vector3 move;
 
         public DirMove(Direction dir)
         {
             this.dir = dir;
             this.pos = new bool[4];
-            move = DirToVect3(Direction.none);
         }
     }
 
     // -------------------- No mather things
-    public string OldLog()
+    public string Log()
     {
         string log = $"{transform.name}\n";
         for (int i = 0; i < accesArea.GetLength(0); i++)
@@ -571,14 +495,14 @@ public class Movement : MonoBehaviour
         }
 
         log += $"Dir = {dirMove.dir.ToString()}\n";
-        log += $"X = {arrayPozX} Z = {arrayPozY}\n";
+        log += $"ArrayX = {arrayPozX}, ArrayY = {arrayPozY}\n";
         log += $"object iteration = {iterationOfObject}\n";
-        log += $"Real position = {transform.position.x}, {transform.position.z}";
+        log += $"RealX {transform.position.x}, RealZ = {transform.position.z}";
         return log;
     }
     public void PrintTxtLogs()
     {
-        logWritter.ReadMapArray2D(Spawner.Instance.GenerateMap, globalIteration.ToString());
-        logWritter.ThrowLogToFile(globalIteration.ToString(), OldLog());
+        MapToTXTprinter.ReadMapArray2D(Spawner.Instance.GenerateMap, globalIteration.ToString());
+        MapToTXTprinter.ThrowLogToFile(globalIteration.ToString(), Log());
     }
 }

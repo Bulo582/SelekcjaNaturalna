@@ -8,7 +8,6 @@ public class Movement : MonoBehaviour // Iteration Module
 {
     // var for know where i am 
     static int currentNumberMove = 1;
-    internal static int globalIteration = 0;
     public int iterationOfObject = 0;
     public int numberOfPerson => rabbitLife.rabbitID;
 
@@ -125,7 +124,7 @@ public class Movement : MonoBehaviour // Iteration Module
                 DirToArrayPoz();
                 PrintTxtLogs();
                 fow.visibleTargets.Clear();
-                target.gameObject.GetComponentInParent<CarrotSpawn>().IterationOnDead = globalIteration;
+                target.gameObject.GetComponentInParent<CarrotSpawn>().IterationOnDead = Iteration.Global;
                 this.gameObject.transform.LookAt(target);
                 target.gameObject.SetActive(false);
                 rabbitLife.Meal();
@@ -502,7 +501,7 @@ public class Movement : MonoBehaviour // Iteration Module
     }
     public void PrintTxtLogs()
     {
-        MapToTXTprinter.ReadMapArray2D(Spawner.Instance.GenerateMap, globalIteration.ToString());
-        MapToTXTprinter.ThrowLogToFile(globalIteration.ToString(), Log());
+        MapToTXTprinter.ReadMapArray2D(Spawner.Instance.GenerateMap, Iteration.Global.ToString());
+        MapToTXTprinter.ThrowLogToFile(Iteration.Global.ToString(), Log());
     }
 }

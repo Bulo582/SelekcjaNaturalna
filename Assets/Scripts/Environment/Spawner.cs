@@ -27,11 +27,11 @@ public class Spawner : MonoBehaviour
     int rabbitIndex = 0;
     int foxIndex = 0;
 
-    readonly int maxRange; // surface area of map
+    int maxRange; // surface area of map
     internal static readonly float rabbitY = 0.3f;
     internal static readonly float carrotY = 0.2f;
     internal static readonly float treeY = -0.01f;
-    internal readonly char[,] originalMap; // map after generated terrain 
+    internal char[,] originalMap; // map after generated terrain 
     char[,] generateMap; // updatable map for movement of object
 
     private static Spawner _instance = null;
@@ -50,7 +50,9 @@ public class Spawner : MonoBehaviour
     {
         if (_instance == null)
         {
-            _instance = new Spawner(noiseMap, heightMap, widthMap, regions);
+            // _instance = new Spawner(noiseMap, heightMap, widthMap, regions);
+            _instance = GameObject.Find("Environment").AddComponent<Spawner>();
+            _instance.Initialize(noiseMap, heightMap, widthMap, regions);
         }
         else
             { Debug.Log("Warning: multiple Spawner instace in scene!"); }
@@ -61,14 +63,14 @@ public class Spawner : MonoBehaviour
         private set { _instance = value; }
     }
 
-    public Spawner(float[,] noiseMap, int heightMap, int widthMap, TerrainType[] regions)
+    private void Initialize(float[,] noiseMap, int heightMap, int widthMap, TerrainType[] regions)
     {
         familyRabbit = Generate.sv.familyRabbits;
         this.halfWidthMap = (widthMap - 2) / -2;
         this.halfHeightMap = (heightMap - 2) / 2;
         this.regions = regions;
         maxRange = MapGenerator.MapSize * MapGenerator.MapSize;
-        generateMap = ArrayModify.GenerateArray(noiseMap,regions);
+        generateMap = ArrayModify.GenerateArray(noiseMap, regions);
         originalMap = ArrayModify.GenerateArray(noiseMap, regions);
         rabbitPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/Rabbit.prefab", typeof(GameObject));
         carrotPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/CarrotSpawn.prefab", typeof(GameObject));

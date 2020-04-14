@@ -10,7 +10,6 @@ public class RabbitDataColleter
     }
 
     Spawner.FamilyRabbit represent;
-    int globalIteration => Movement.globalIteration;
     int popSum => Generate.rabbitPopSum;
     Dictionary<RabbitLife, IterationRabbitInfo> BookOfKnowledge = new Dictionary<RabbitLife, IterationRabbitInfo>();
 

@@ -50,9 +50,8 @@ public class SmothMove : MonoBehaviour
                 GameManager.logger.PrintLog($"{this.gameObject.name} - Smooth Dir.{dir.ToString()}");
                 if (numebrOfPerson == Generate.rabbitPopSum)
                 {
-                    Movement.globalIteration++;
+                    Iteration.NextIteration();
                 }
-
             }
         }
         else
@@ -73,7 +72,7 @@ public class SmothMove : MonoBehaviour
                 GameManager.logger.PrintLog($"{this.gameObject.name} - Smooth Dir.none");
                 if (numebrOfPerson == Generate.rabbitPopSum)
                 {
-                    Movement.globalIteration++;
+                    Iteration.NextIteration();
                 }
             }
         }
@@ -112,7 +111,7 @@ public class SmothMove : MonoBehaviour
             time = 0;
             KeepSimulation.simulationMovementCooldown = 0;
             globalSimulatedSeeker.Set(0, 0);
-            Movement.globalIteration++;
+            Iteration.NextIteration();
         }
     }
 }

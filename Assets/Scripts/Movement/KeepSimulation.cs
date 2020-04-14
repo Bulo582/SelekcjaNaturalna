@@ -6,7 +6,7 @@ public class KeepSimulation : MonoBehaviour
 {
     internal bool debugMode;
     // Var needed if no one rabbit exist.
-    public int globalIteration = Movement.globalIteration;
+    public int globalIteration = Iteration.Global;
     static internal float simulationMovementCooldown = 0;
     static internal float simulationTime = 0;
     float simulationCooldownTime = 2f;
@@ -20,10 +20,10 @@ public class KeepSimulation : MonoBehaviour
             {
                 SmothMove.SimulationMove(ref simulationTime);
                 if(debugMode)
-                    globalIteration = Movement.globalIteration;
+                    globalIteration = Iteration.Global;
             }
         }
         else if(debugMode)
-            globalIteration = Movement.globalIteration;
+            globalIteration = Iteration.Global;
     }
 }

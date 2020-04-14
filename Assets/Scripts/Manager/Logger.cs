@@ -9,7 +9,7 @@ public class Logger
     {
         if (canLog)
         {
-            Debug.Log($"I = {Movement.globalIteration}\n" +
+            Debug.Log($"I = {Iteration.Global}\n" +
                 $"{log}");
         }
     }
@@ -18,7 +18,7 @@ public class Logger
     {
         if (canLog)
         {
-            Debug.Log($"I = {Movement.globalIteration}\n" +
+            Debug.Log($"I = {Iteration.Global}\n" +
                 $"{log}");
         }
     }

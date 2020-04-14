@@ -33,7 +33,7 @@ public class CarrotSpawn : MonoBehaviour
     {
         if(!this.gameObject.transform.GetChild(0).gameObject.activeSelf)
         {
-            if (IterationOnRespawn <= Movement.globalIteration)
+            if (IterationOnRespawn <= Iteration.Global)
             {
                 this.gameObject.transform.position = Spawner.GetLegalVector3();
                 this.gameObject.transform.GetChild(0).gameObject.SetActive(true);

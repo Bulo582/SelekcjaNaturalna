@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Iteration
 {
-    private static int _global = 0;
+    private static int _global = 1;
 
     public static int Global
     {
@@ -13,6 +13,8 @@ public class Iteration
 
     internal static void NextIteration()
     {
+        PopulationController.CollectingRabbitInfo();
+        PopulationController.CollectionFamiliesInfo();
         _global++;
     }
 }

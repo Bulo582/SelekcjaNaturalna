@@ -8,7 +8,7 @@ public class Movement : MonoBehaviour // Iteration Module
 {
     // var for know where i am 
     static int currentNumberMove = 1;
-    public int iterationOfObject = 0;
+    public int iterationOfObject = 0; // sent to rabbitLife
     public int numberOfPerson => rabbitLife.rabbitID;
 
     // var for know what doing now
@@ -44,6 +44,7 @@ public class Movement : MonoBehaviour // Iteration Module
 
     //Other modules 
     FieldOfView fow;
+    public RabbitIteraionInfo RII;
     internal RabbitLife rabbitLife;
     MapToTxt MapToTXTprinter;
     void Start()
@@ -52,13 +53,14 @@ public class Movement : MonoBehaviour // Iteration Module
         MapToTXTprinter = new MapToTxt(this.gameObject.name);
         fow = GetComponent<FieldOfView>();
         rabbitLife = GetComponent<RabbitLife>();
+        RII = new RabbitIteraionInfo(rabbitLife.name, rabbitLife.FamilyRabbit);
         movementCooldownIncrease = StartRabbit.Manager.movementSpeed;
         Vector3 actualPosition = this.gameObject.transform.position;
         arrayPozX = MapHelper.TransormX_ToMapX(actualPosition.x);
         arrayPozY = MapHelper.TransormZ_ToMapY(actualPosition.z);
         dirMove = new DirMove(Direction.none);
         accesArea = ArrayModify.CircleOut(Spawner.Instance.GenerateMap, arrayPozX, arrayPozY, 1);
-        MovementController.Creatures.Add(this);
+        PopulationController.Creatures.Add(this);
         canMakeWay = true;
         PrintTxtLogs();
     }
@@ -102,6 +104,7 @@ public class Movement : MonoBehaviour // Iteration Module
         bool ate = false;
         IterationWithoutEat++;
         iterationOfObject++;
+        FamilyIterationInfo.Instance.NextIterationOfObject(rabbitLife.FamilyRabbit.familyID);
 
         if (IterationWithoutEat >= dietIteration)
         {
@@ -142,6 +145,7 @@ public class Movement : MonoBehaviour // Iteration Module
     {
         IterationWithoutEat++;
         iterationOfObject++;
+        FamilyIterationInfo.Instance.NextIterationOfObject(rabbitLife.FamilyRabbit.familyID);
 
         if (IterationWithoutEat >= dietIteration)
         {
@@ -164,11 +168,11 @@ public class Movement : MonoBehaviour // Iteration Module
     {
         Generate.rabbitPopSum--;
         
-        MovementController.Creatures.Remove(this);
+        PopulationController.Creatures.Remove(this);
         GameManager.logger.PrintLog($"{this.gameObject.name} - Die");
         Destroy(this.gameObject);
         Spawner.Instance.GenerateMap[arrayPozX, arrayPozY] = Spawner.Instance.originalMap[arrayPozX, arrayPozY];
-        MovementController.NumeringPopulation();
+        PopulationController.NumeringPopulation();
     }
     private void Move()
     {
@@ -180,7 +184,7 @@ public class Movement : MonoBehaviour // Iteration Module
     public IEnumerator CoordinatePopulation()
     {
         yield return new WaitWhile(() => populationReady == true);
-        populationReady = MovementController.IsReady();
+        populationReady = PopulationController.IsReady();
     }
 
     #region Array/Prepare to Move

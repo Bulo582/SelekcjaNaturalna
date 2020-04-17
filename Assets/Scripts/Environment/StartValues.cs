@@ -6,7 +6,7 @@ public class StartValues : MonoBehaviour
 {
     public int RabbitFamilyCount = 0;
     // int foxesStartCount = 0;
-    public int carrotSpawnCound = 0;
+    public int carrotSpawnCount = 0;
     public int treeCount = 0;
     public bool testCase = false;
     public Spawner.FamilyRabbit[] familyRabbits;
@@ -26,6 +26,7 @@ public class StartValues : MonoBehaviour
         for (int i = 0; i < familyRabbits.Length; i++)
         {
             familyPopSum += familyRabbits[i].startPop;
+            familyRabbits[i].familyID = i;
             if (System.String.IsNullOrEmpty(familyRabbits[i].familyName))
             {
                 familyRabbits[i].familyName = $"Family_{i+1}";

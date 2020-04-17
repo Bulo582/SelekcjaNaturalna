@@ -26,4 +26,9 @@ public class KeepSimulation : MonoBehaviour
         else if(debugMode)
             globalIteration = Iteration.Global;
     }
+
+    public void Start()
+    {
+        simulationCooldownIncrease = StartRabbit.Manager.movementSpeed;
+    }
 }

@@ -11,7 +11,8 @@ public class Spawner : MonoBehaviour
     GameObject carrotPrefab;
     GameObject foxPrefab;
     GameObject treePrefab;
-    FamilyRabbit[] familyRabbit;
+    FamilyRabbit[] familyRabbit; 
+
     TerrainType[] regions;
     int halfWidthMap; // variable needed to convert transform pos to array pos
     int halfHeightMap; // variable needed to convert transform pos to array pos
@@ -65,7 +66,14 @@ public class Spawner : MonoBehaviour
 
     private void Initialize(float[,] noiseMap, int heightMap, int widthMap, TerrainType[] regions)
     {
-        familyRabbit = Generate.sv.familyRabbits;
+        familyRabbit = new FamilyRabbit[Generate.sv.familyRabbits.Length];
+        for (int i = 0; i < Generate.sv.familyRabbits.Length; i++)
+        {
+            familyRabbit[i].startPop = Generate.sv.familyRabbits[i].startPop;
+            familyRabbit[i].familyID = Generate.sv.familyRabbits[i].familyID;
+            familyRabbit[i].familyName = Generate.sv.familyRabbits[i].familyName;
+            familyRabbit[i].color = Generate.sv.familyRabbits[i].color;
+        }
         this.halfWidthMap = (widthMap - 2) / -2;
         this.halfHeightMap = (heightMap - 2) / 2;
         this.regions = regions;
@@ -125,7 +133,7 @@ public class Spawner : MonoBehaviour
         rabbit.GetComponent<Movement>().ready = true;
         rabbit.GetComponent<Movement>().populationReady = true;
         generateMap[x, y] = 'R';
-        GameManager.logger.PrintLog($"{rabbit.name} Born -- populationReady {MovementController.IsReady()}");
+        GameManager.logger.PrintLog($"{rabbit.name} Born -- populationReady {PopulationController.IsReady()}");
     }
     public void SpawnRabbits(int count)
     {
@@ -365,6 +373,7 @@ public class Spawner : MonoBehaviour
     [System.Serializable]
     public struct FamilyRabbit
     {
+        public int familyID;
         public string familyName;
         public Color color;
         public int startPop;

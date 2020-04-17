@@ -8,10 +8,11 @@ public class RabbitLife : MonoBehaviour
 {
     public int rabbitID; // identify rabbit in Iteration Module ..// this variable getting of value from meth. NumeringPopulation()
     internal Spawner.FamilyRabbit FamilyRabbit; // membership of group...
-    int eaten = 0; // sum carrots which the rabbit eaten in whole our life 
     string Name; // name of current rabbit
     int reproductionPoint; // count carrot to division
     int Hunger; // counter that how eaten carrot before divison
+    public int Eaten = 0; // sum carrots which the rabbit eaten in whole our life 
+    // prefer add here IterationOfObject
 
     int arrayPosX;
     int arrayPosY;
@@ -31,7 +32,9 @@ public class RabbitLife : MonoBehaviour
     }
     public void Meal()
     {
+        Eaten++;
         Hunger++;
+        FamilyIterationInfo.Instance.NextMealOfObject(FamilyRabbit.familyID);
 
         if (Hunger >= reproductionPoint)
             Division();
@@ -145,7 +148,6 @@ public class RabbitLife : MonoBehaviour
     /// </summary>
     public void Division()
      {
-        eaten += Hunger;
         Hunger = 0;
         arrayPosX = MapHelper.TransormX_ToMapX(this.transform.position.x);
         arrayPosY = MapHelper.TransormZ_ToMapY(this.transform.position.z);
@@ -155,8 +157,9 @@ public class RabbitLife : MonoBehaviour
     }
     IEnumerator WaitForLastPerson()
     {
-        yield return new WaitWhile(() => MovementController.IsReady() == true);
+        yield return new WaitWhile(() => PopulationController.IsReady() == true);
         Spawner.Instance.SpawnChildOfRabbit(arrayPosX, arrayPosY, FamilyRabbit);
+        FamilyIterationInfo.Instance.NewRabbit(FamilyRabbit.familyID);
         if (Generate.freeFields == Generate.rabbitPopSum - 1)
         {
             Time.timeScale = 0;

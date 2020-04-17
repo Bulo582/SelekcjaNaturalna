@@ -19,6 +19,7 @@ public class Generate : MonoBehaviour
         sv = GameObject.Find("Environment").GetComponent<StartValues>();
         rabbitPopSum = sv.FamilyPopSum();
         reSpawn = !sv.testCase;
+        sv.MyUpdate();
         GameObject.Find("MapGenerator").GetComponent<MapGenerator>().DrawMapInEditor();
         if (reSpawn)
         {
@@ -26,7 +27,7 @@ public class Generate : MonoBehaviour
             freeFields = MapHelper.MapFreeFieldCount();
             Spawner.Instance.SpawnRabbits(rabbitPopSum);
             //Spawner.Instance.SpawnFoxes(sv.foxesStartCount);
-            Spawner.Instance.SpawnCarrots(sv.carrotSpawnCound);
+            Spawner.Instance.SpawnCarrots(sv.carrotSpawnCount);
             Spawner.Instance.SpawnTrees(sv.treeCount);
         }
         else
@@ -35,7 +36,6 @@ public class Generate : MonoBehaviour
             Spawner.Instance.TestSpawn();
         }
         GameManager.mapToTXTprinter.StaticReadMapArray2D(Spawner.Instance.GenerateMap);
-        sv.MyUpdate();
     }
 
 }

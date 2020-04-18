@@ -74,15 +74,16 @@ public struct FamiliyInfo
     public int allLivenObject;
     public bool isAlive
     {
-        get { return this.isAlive; }
+        get { return this._isAlive; }
         set 
-        { 
-            isAlive = value;
+        {
+            _isAlive = value;
             if (!value)
                 iterationOnDead = Iteration.Global;
         }
     }
     private int iterationOnDead;
+    private bool _isAlive;
     //-------------------------
 }
 

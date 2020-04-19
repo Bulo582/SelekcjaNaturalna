@@ -10,6 +10,7 @@ public class Generate : MonoBehaviour
     internal static int rabbitPopSum;
     internal static int freeFields = 0;
     internal static int generation = 0;
+    internal static List<MapFieldInfo> mapFieldInfos = new List<MapFieldInfo>();
     void Awake()
     {
         Generating();
@@ -23,8 +24,12 @@ public class Generate : MonoBehaviour
         GameObject.Find("MapGenerator").GetComponent<MapGenerator>().DrawMapInEditor();
         if (reSpawn)
         {
-            Spawner.InstanceCreator(MeshGenerator.HeightMap, MapGenerator.MapSize, MapGenerator.MapSize, MapGenerator.Regions);
-            freeFields = MapHelper.MapFreeFieldCount();
+            if (!Spawner.InstanceExist)
+            {
+                Spawner.InstanceCreator(MeshGenerator.HeightMap, MapGenerator.MapSize, MapGenerator.MapSize, MapGenerator.Regions);
+                freeFields = MapHelper.MapFreeFieldCount(ref mapFieldInfos);
+            }
+            Spawner.Instance.ResetMapAray();
             Spawner.Instance.SpawnRabbits(rabbitPopSum);
             //Spawner.Instance.SpawnFoxes(sv.foxesStartCount);
             Spawner.Instance.SpawnCarrots(sv.carrotSpawnCount);
@@ -32,7 +37,9 @@ public class Generate : MonoBehaviour
         }
         else
         {
-            Spawner.InstanceCreator(MeshGenerator.HeightMap, MapGenerator.MapSize, MapGenerator.MapSize, MapGenerator.Regions);
+            if(!Spawner.InstanceExist)
+                Spawner.InstanceCreator(MeshGenerator.HeightMap, MapGenerator.MapSize, MapGenerator.MapSize, MapGenerator.Regions);
+            Spawner.Instance.ResetMapAray();
             Spawner.Instance.TestSpawn();
         }
         GameManager.mapToTXTprinter.StaticReadMapArray2D(Spawner.Instance.GenerateMap);

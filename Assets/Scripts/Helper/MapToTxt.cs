@@ -282,7 +282,7 @@ public class MapToTxt
     public void StaticReadMapArray2D(char[,] array, string alias = "")
     {
         string filePath;
-        filePath = Path.Combine(FileHelper.testFolder, $"Map{alias}.txt");
+        filePath = Path.Combine(FileHelper.testFolder, $"Map{alias}.mp");
 
         if (Do)
         {

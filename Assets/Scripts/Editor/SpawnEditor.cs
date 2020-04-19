@@ -19,7 +19,6 @@ public class SpawnEditor : Editor
 
         if (GUILayout.Button("Generate"))
         {
-            MapToTxt.Do = true;
             if (MeshGenerator.HeightMap == null)
             {
                 var generator = GameObject.Find("MapGenerator");
@@ -31,6 +30,7 @@ public class SpawnEditor : Editor
         {
             try
             {
+                Spawner.Instance.ResetMapAray();
                 Spawner.Instance.DeleteCarrotsSpawn();
                 Spawner.Instance.DeleteCarrots();
                 Spawner.Instance.DeleteFoxes();
@@ -46,6 +46,7 @@ public class SpawnEditor : Editor
                     generator.GetComponent<MapGenerator>().DrawMapInEditor();
                 }
                 Spawner.InstanceCreator(MeshGenerator.HeightMap, MapGenerator.MapSize, MapGenerator.MapSize, MapGenerator.Regions);
+                Spawner.Instance.ResetMapAray();
                 Spawner.Instance.DeleteCarrotsSpawn();
                 Spawner.Instance.DeleteCarrots();
                 Spawner.Instance.DeleteFoxes();

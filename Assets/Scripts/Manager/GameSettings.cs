@@ -18,12 +18,12 @@ public class GameSettings : MonoBehaviour
     private void Start()
     {
         SetTime();
-        SetDoTXT();
         SetDebugMode();
-        SetLoggerMode();
     }
     private void Awake()
     {
+        SetLoggerMode();
+        SetDoTXT();
         DeleteAllTestFile();
         DeleteAllTestFolders();
     }

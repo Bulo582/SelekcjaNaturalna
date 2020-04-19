@@ -32,22 +32,27 @@ public class FieldOfView : MonoBehaviour
 
     void FindVisableTargets()
     {
-        visibleTargets.Clear();
-        Collider[] targetInViewRadius = Physics.OverlapSphere(transform.position, viewRadious, targetMask);
-        for (int i = 0; i < targetInViewRadius.Length; i++)
+        if (visibleTargets.Count == 0)
         {
-            Transform target = targetInViewRadius[i].transform;
-            Vector3 dirToTarget = (target.position - transform.position).normalized;
-            if(Vector3.Angle(transform.forward,dirToTarget) < viewAngle /2 )
+            visibleTargets.Clear();
+            Collider[] targetInViewRadius = Physics.OverlapSphere(transform.position, viewRadious, targetMask);
+
+            for (int i = 0; i < targetInViewRadius.Length; i++)
             {
-                float dstToTarget = Vector3.Distance(transform.position, target.position);
-                if(!Physics.Raycast(transform.position,dirToTarget,dstToTarget,obstacleMask))
+                Transform target = targetInViewRadius[i].transform;
+                Vector3 dirToTarget = (target.position - transform.position).normalized;
+                if (Vector3.Angle(transform.forward, dirToTarget) < viewAngle / 2)
                 {
-                    visibleTargets.Add(target);
+                    float dstToTarget = Vector3.Distance(transform.position, target.position);
+                    if (!Physics.Raycast(transform.position, dirToTarget, dstToTarget, obstacleMask))
+                    {
+                        visibleTargets.Add(target);
+                        break;
+                    }
                 }
             }
+            //visibleTargets = visibleTargets.OrderBy(target => Vector3.Distance(transform.position, target.transform.position)).ToList();
         }
-        visibleTargets = visibleTargets.OrderBy(target => Vector3.Distance(transform.position, target.transform.position)).ToList();
     }
 
 

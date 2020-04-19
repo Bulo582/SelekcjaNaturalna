@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class Iteration
 {
     private static int _global = 1;
@@ -18,3 +19,4 @@ public class Iteration
         _global++;
     }
 }
+

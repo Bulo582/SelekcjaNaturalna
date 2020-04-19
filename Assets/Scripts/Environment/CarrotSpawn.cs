@@ -35,7 +35,7 @@ public class CarrotSpawn : MonoBehaviour
         {
             if (IterationOnRespawn <= Iteration.Global)
             {
-                this.gameObject.transform.position = Spawner.GetLegalVector3();
+                this.gameObject.transform.position = Spawner.Instance.GetLegalVector3();
                 this.gameObject.transform.GetChild(0).gameObject.SetActive(true);
                 arrayPozX = MapHelper.TransormX_ToMapX(transform.position.x);
                 arrayPozY = MapHelper.TransormZ_ToMapY(transform.position.z);

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using System;
 using static MapGenerator;
 
 public class Spawner : MonoBehaviour
@@ -25,8 +24,16 @@ public class Spawner : MonoBehaviour
         get { return halfHeightMap; }
     }
 
-    int rabbitIndex = 0;
-    int foxIndex = 0;
+    public static bool InstanceExist
+    {
+        get 
+        {
+            if (_instance != null)
+                return true;
+            else
+                return false;
+        }
+    }
 
     int maxRange; // surface area of map
     internal static readonly float rabbitY = 0.3f;
@@ -35,7 +42,6 @@ public class Spawner : MonoBehaviour
     internal char[,] originalMap; // map after generated terrain 
     char[,] generateMap; // updatable map for movement of object
 
-    private static Spawner _instance = null;
     public char[,] GenerateMap
     {
         get
@@ -47,6 +53,7 @@ public class Spawner : MonoBehaviour
             this.generateMap = value;
         }
     }
+
     public static void InstanceCreator(float[,] noiseMap, int heightMap, int widthMap, TerrainType[] regions)
     {
         if (_instance == null)
@@ -58,6 +65,8 @@ public class Spawner : MonoBehaviour
         else
             { Debug.Log("Warning: multiple Spawner instace in scene!"); }
     }
+
+    private static Spawner _instance = null;
     public static Spawner Instance
     {
         get { return _instance; }
@@ -85,35 +94,28 @@ public class Spawner : MonoBehaviour
         foxPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/Fox.prefab", typeof(GameObject));
         treePrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/Tree.prefab", typeof(GameObject));
     }
-    public static Vector3 GetLegalVector3(float y = 0.2f)
+
+    public Vector3 GetLegalVector3(float y = 0.2f)
     {
-        int range;
-        while(true)
+        int i, j;
+        while (true)
         {
-            for (int i = 0; i < Instance.GenerateMap.GetLength(0); i++)
-            {
-                for (int j = 0; j < Instance.GenerateMap.GetLength(1); j++)
-                {
-                    if (int.TryParse(Instance.GenerateMap[i, j].ToString(), out int result) && result >= 2)
-                    {
-                        range = UnityEngine.Random.Range(0, 1000);
-                        if (range < 5)
-                        {
-                            return  new Vector3(Instance.HalfWidthMap + i, y, j - Instance.halfHeightMap);
-                        }
-                    }
-                }
-            }
+            i = Random.Range(0, originalMap.GetLength(0));
+            j = Random.Range(0, originalMap.GetLength(1));
+
+            if (int.TryParse(GenerateMap[i, j].ToString(), out int result) && result >= 2)
+                return  new Vector3(HalfWidthMap + i, y, j - halfHeightMap);
         }
     }
 
     #region Spawns
     public void TestSpawn() // testCase for specific seed of map
     {
+        int rabbitFamilyIndex = 0;
         int rabbitX = 1;
         int rabbitY = 2;
         GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + rabbitX, rabbitY, rabbitY - halfHeightMap), Quaternion.identity) as GameObject;
-        rabbit.name = "Rabbit" + rabbitIndex;
+        rabbit.name = "Rabbit" + rabbitFamilyIndex;
         rabbit.transform.parent = GameObject.Find("Rabbits").transform;
         generateMap[rabbitX, rabbitY] = 'R';
 
@@ -138,53 +140,47 @@ public class Spawner : MonoBehaviour
     public void SpawnRabbits(int count)
     {
         DeleteRabbits();
-        int range;
+        int antyInfinityLoop = 100;
         int indexName = 0;
-        int breakout = 0;
         int generated = 0;
-        while(true)
+        int rabbitFamilyIndex = 0;
+        int i, j;
+        while(antyInfinityLoop > 0)
         {
-            if (count >= generateMap.Length)
-                break;
-            breakout++;
-            if (breakout > maxRange)
-                generated = breakout;
-
-            for (int i = 0; i < generateMap.GetLength(0); i++)
+            antyInfinityLoop--;
+            if (count >= Generate.freeFields)
             {
-                for (int j = 0; j < generateMap.GetLength(1); j++)
+                Debug.LogError("You want generate population bigger than map can recive!");
+                break;
+            }
+
+            i = Random.Range(0, originalMap.GetLength(0));
+            j = Random.Range(0, originalMap.GetLength(1));
+
+            if (int.TryParse(generateMap[i, j].ToString(), out int result) && result >= 2)
+            {
+                if (familyRabbit[rabbitFamilyIndex].startPop <= 0)
                 {
-                    if (int.TryParse(generateMap[i, j].ToString(), out int result) && result >= 2)
-                    {
-                        range = UnityEngine.Random.Range(0, maxRange);
-                        if (range == 0)
-                        {
-                            if (familyRabbit[rabbitIndex].startPop > 0)
-                            {
-                                Generate.generation++;
-                                indexName++;
-                                GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + i, rabbitY, j - halfHeightMap), Quaternion.identity) as GameObject;
-                                familyRabbit[rabbitIndex].startPop--;
-                                rabbit.GetComponent<RabbitLife>().FamilyRabbit = familyRabbit[rabbitIndex];
-                                rabbit.name = $"Rabbit_{indexName}";
-                                rabbit.GetComponent<RabbitLife>().rabbitID = indexName;
-                                rabbit.transform.parent = GameObject.Find("Rabbits").transform;
-                                generateMap[i, j] = 'R';
-                                generated++;
-                            }
-                            else
-                                rabbitIndex++;
-                        }
-                    }
-                    if (generated >= count)
-                        break;
+                    familyRabbit[rabbitFamilyIndex].startPop = Generate.sv.familyRabbits[rabbitFamilyIndex].startPop;
+                    rabbitFamilyIndex++;
                 }
-                if (generated >= count)
-                    break;
+
+                Generate.generation++;
+                indexName++;
+                GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + i, rabbitY, j - halfHeightMap), Quaternion.identity) as GameObject;
+                familyRabbit[rabbitFamilyIndex].startPop--;
+                rabbit.GetComponent<RabbitLife>().FamilyRabbit = familyRabbit[rabbitFamilyIndex];
+                rabbit.name = $"Rabbit_{indexName}";
+                rabbit.GetComponent<RabbitLife>().rabbitID = indexName;
+                rabbit.transform.parent = GameObject.Find("Rabbits").transform;
+                generateMap[i, j] = 'R';
+                generated++;
+                antyInfinityLoop = 100;
             }
             if (generated >= count)
                 break;
         }
+        rabbitFamilyIndex = 0;
         //Debug
         //ArrayToTxt.ReadMapArray2D(generateMap);
     }
@@ -192,40 +188,28 @@ public class Spawner : MonoBehaviour
     {
         DeleteCarrotsSpawn();
         DeleteCarrots();
-        int range;
         int generated = 0;
-        int breakout = 0;
-        while (true)
+        int antyInfinityLoop = 100;
+        int i, j;
+        while (antyInfinityLoop > 0)
         {
-            if (count >= generateMap.Length)
-                break;
-            breakout++;
-            if (breakout > Mathf.Abs(generateMap.Length))
-                generated = breakout;
-            for (int i = 0; i < generateMap.GetLength(0); i++)
+            antyInfinityLoop--;
+            if (count >= Generate.freeFields + Generate.rabbitPopSum)
             {
-                for (int j = 0; j < generateMap.GetLength(1); j++)
-                {
-                    if (int.TryParse(generateMap[i, j].ToString(), out int result) && result >= 3)
-                    {
-                        range = UnityEngine.Random.Range(0, maxRange);
-                        if (range < 2)
-                        {
-                            if (true)
-                            {
-                                GameObject carriot = Instantiate(carrotPrefab, new Vector3(halfWidthMap + i, carrotY, j - halfHeightMap), Quaternion.identity) as GameObject;
-                                carriot.transform.parent = GameObject.Find("Carrots").transform;
-                                generateMap[i, j] = 'C';
-                                generated++;
-                            }
+                Debug.LogError("You want generate population of carrot more than map can recive!");
+                break;
+            }
 
-                        }
-                    }
-                    if (generated >= count)
-                        break;
-                }
-                if (generated >= count)
-                    break;
+            i = Random.Range(0, originalMap.GetLength(0));
+            j = Random.Range(0, originalMap.GetLength(1));
+
+            if (int.TryParse(generateMap[i, j].ToString(), out int result) && result >= 3)
+            {
+                GameObject carriot = Instantiate(carrotPrefab, new Vector3(halfWidthMap + i, carrotY, j - halfHeightMap), Quaternion.identity) as GameObject;
+                carriot.transform.parent = GameObject.Find("Carrots").transform;
+                generateMap[i, j] = 'C';
+                generated++;
+                antyInfinityLoop = 100;
             }
             if (generated >= count)
                 break;
@@ -234,38 +218,25 @@ public class Spawner : MonoBehaviour
     public void SpawnTrees(int count)
     {
         DeleteTree();
-        int range;
+
         int generated = 0;
-        int breakout = 0;
-        while (true)
+        int antyInfinityLoop = 100;
+        int i, j;
+        while (antyInfinityLoop > 0)
         {
-            if (count >= generateMap.Length)
-                break;
-            breakout++;
-            if (breakout > generateMap.Length * 100)
-                generated = breakout;
-            for (int i = 0; i < generateMap.GetLength(0); i++)
+            antyInfinityLoop--;
+            i = Random.Range(0, originalMap.GetLength(0));
+            j = Random.Range(0, originalMap.GetLength(1));
+
+            if (int.TryParse(generateMap[i, j].ToString(), out int result) && result >= 4)
             {
-                for (int j = 0; j < generateMap.GetLength(1); j++)
-                {
-                    if (int.TryParse(generateMap[i, j].ToString(), out int result) && result >= 4)
-                    {
-                        range = UnityEngine.Random.Range(0, 100);
-                        if (range < 1)
-                        {
-                            GameObject tree = Instantiate(treePrefab, new Vector3(halfWidthMap + i, treeY, j - halfHeightMap), Quaternion.identity) as GameObject;
-                            float scale = UnityEngine.Random.Range(1f, 4.5f);
-                            tree.transform.localScale = new Vector3(scale, scale, scale);
-                            tree.transform.parent = GameObject.Find("Trees").transform;
-                            generateMap[i, j] = 'T';
-                            generated++;
-                        }
-                    }
-                    if (generated >= count)
-                        break;
-                }
-                if (generated >= count)
-                    break;
+                GameObject tree = Instantiate(treePrefab, new Vector3(halfWidthMap + i, treeY, j - halfHeightMap), Quaternion.identity) as GameObject;
+                float scale = UnityEngine.Random.Range(1f, 4.5f);
+                tree.transform.localScale = new Vector3(scale, scale, scale);
+                tree.transform.parent = GameObject.Find("Trees").transform;
+                generateMap[i, j] = 'T';
+                generated++;
+                antyInfinityLoop = 100;
             }
             if (generated >= count)
                 break;
@@ -277,6 +248,7 @@ public class Spawner : MonoBehaviour
         int range;
         int generated = 0;
         int breakout = 0;
+        int foxIndex = 0;
         while (true)
         {
             if (count >= generateMap.Length)
@@ -365,6 +337,17 @@ public class Spawner : MonoBehaviour
         for (var i = 0; i < gameObjects.Length; i++)
         {
             DestroyImmediate(gameObjects[i]);
+        }
+    }
+
+    public void ResetMapAray()
+    {
+        for (int i = 0; i < generateMap.GetLength(0); i++)
+        {
+            for (int j = 0; j < generateMap.GetLength(1); j++)
+            {
+                generateMap[i,j] = originalMap[i,j];
+            }
         }
     }
 

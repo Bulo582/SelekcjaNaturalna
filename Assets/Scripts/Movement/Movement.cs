@@ -94,7 +94,7 @@ public class Movement : MonoBehaviour // Iteration Module
         if (canMakeWay)
         {
             if (HaveTarget)
-                ToTargetMove();
+                RandomMove();
             else
                 RandomMove();
         }

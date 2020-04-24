@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CameraAround : MonoBehaviour
 {
-    private float speed = 3;
+    public float speed = 3;
 
     void Update()
     {

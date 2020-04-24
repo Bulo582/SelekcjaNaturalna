@@ -59,8 +59,12 @@ public class AlgoritmTime
 
     public void AveLog()
     {
-        if(canDo)
+        if (canDo)
+        {
             UnityEngine.Debug.Log("Path found: " + AlgoritmTime.Instance.ave + " ms./interation");
+            sum = 0;
+            count = 0;
+        }
     }
 
     public void NewTest()

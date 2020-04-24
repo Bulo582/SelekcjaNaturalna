@@ -14,7 +14,7 @@ public class Iteration
 
     internal static void NextIteration()
     {
-        Debug.Log("Path found: " + AlgoritmTime.Instance.ave + " ms./interation");
+        AlgoritmTime.Instance.AveLog();
         PopulationController.CollectingRabbitInfo();
         PopulationController.CollectionFamiliesInfo();
         _global++;

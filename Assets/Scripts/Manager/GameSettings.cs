@@ -38,6 +38,7 @@ public class GameSettings : MonoBehaviour
     public void SetDebugMode()
     {
         GetComponent<KeepSimulation>().debugMode = debugMode;
+        AlgoritmTime.Instance.canDo = debugMode;
     }
     public void SetLoggerMode()
     {

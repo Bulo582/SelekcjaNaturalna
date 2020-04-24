@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class AlgoritmTime
 {
+    public bool canDo = true;
     private static AlgoritmTime _instance;
     public static AlgoritmTime Instance
     {
@@ -36,19 +37,17 @@ public class AlgoritmTime
 
     public void Start()
     {
-        if (!running)
+        if (!running && canDo)
         {
             count++;
             running = true;
             sw.Start();
         }
-        else
-            UnityEngine.Debug.LogError("First stop watcher");
     }
 
     public void Stop(bool reset = true)
     {
-        if (running)
+        if (running || canDo)
         {
             running = false;
             sw.Stop();
@@ -56,8 +55,12 @@ public class AlgoritmTime
             if(reset)
                 sw.Reset();
         }
-        else
-            UnityEngine.Debug.LogError("First start watcher");
+    }
+
+    public void AveLog()
+    {
+        if(canDo)
+            UnityEngine.Debug.Log("Path found: " + AlgoritmTime.Instance.ave + " ms./interation");
     }
 
     public void NewTest()

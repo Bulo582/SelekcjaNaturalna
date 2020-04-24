@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using System.Diagnostics;
 
-public class Pathfinding : MonoBehaviour
+public class Pathfinding : MonoBehaviour, IComparable<Node>
 {
     public static List<Node> GetWalkableAdjacentSquares(Node node, char[,] map)
     {
@@ -21,14 +22,22 @@ public class Pathfinding : MonoBehaviour
         return locations.Where(n => int.TryParse(map[n.X, n.Y].ToString(), out int res) || map[n.X, n.Y].ToString() == "C").ToList();
     }
 
+    public int CompareTo(Node other)
+    {
+        throw new NotImplementedException();
+    }
+
     public List<Node> FindPath(Transform target)
     {
+        AlgoritmTime.Instance.Start();
         List<Node> path = new List<Node>();
         Node nodeSeeker = new Node(MapHelper.TransormX_ToMapX(transform.position.x), MapHelper.TransormZ_ToMapY(transform.position.z));
         Node nodeTarget = new Node(MapHelper.TransormX_ToMapX(target.position.x), MapHelper.TransormZ_ToMapY(target.position.z));
         Node current = null;
-        List<Node> openList = new List<Node>();
-        List<Node> closedList = new List<Node>();
+        
+        List<Node> openList = new List<Node>(MapGenerator.SurfaceArea);
+        List<Node> closedList = new List<Node>(MapGenerator.SurfaceArea);
+
         int g = 0;
         openList.Add(nodeSeeker);
         while (openList.Count > 0)
@@ -39,19 +48,18 @@ public class Pathfinding : MonoBehaviour
             closedList.Add(current);
             openList.Remove(current);
 
-            if (closedList.FirstOrDefault(node => node.X == nodeTarget.X && node.Y == nodeTarget.Y) != null)
+            if (closedList.Find(node => node.X == nodeTarget.X && node.Y == nodeTarget.Y) != null) 
                 break;
             List<Node> neighbors = GetWalkableAdjacentSquares(current, Spawner.Instance.GenerateMap);
             g++;
             foreach (Node node in neighbors)
             {
-                if (closedList.FirstOrDefault(n => n.X == node.X && n.Y == node.Y) != null)
+                if (closedList.Find(n => n.X == node.X && n.Y == node.Y) != null)
                     continue;
-                if (openList.FirstOrDefault(n => n.X == node.X && n.Y == node.Y) == null)
+                if (openList.Find(n => n.X == node.X && n.Y == node.Y) == null)
                 {
                     node.G = g;
                     node.H = Node.CountHScore(node, nodeTarget.X, nodeTarget.Y);
-                    node.F = node.G + node.H;
                     node.Partent = current;
                     openList.Insert(0, node);
                 }
@@ -60,7 +68,6 @@ public class Pathfinding : MonoBehaviour
                     if (g + node.H < node.F)
                     {
                         node.G = g;
-                        node.F = node.H + node.G;
                         node.Partent = current;
                     }
                 }
@@ -76,6 +83,7 @@ public class Pathfinding : MonoBehaviour
             else
                 current = current.Partent;
         }
+        AlgoritmTime.Instance.Stop();
         path.Reverse();
         return path;
     }

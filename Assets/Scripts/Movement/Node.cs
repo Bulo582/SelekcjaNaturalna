@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Node 
+public class Node
 {
     public int X;
     public int Y;
-    public int F;
+    public int F { get { return G + H; } }
     public int G;
     public int H;
     public Node Partent;
@@ -44,5 +44,28 @@ public class Node
         if (this.X == target.X && this.Y == target.Y)
             return true;
         else return false;
+    }
+
+    int heapIndex;
+    public int HeapIndex
+    {
+        get
+        {
+            return heapIndex;
+        }
+        set
+        {
+            heapIndex = value;
+        }
+    }
+
+    public int CompareTo(Node nodeToCompare)
+    {
+        int compare = F.CompareTo(nodeToCompare.F);
+        if (compare == 0)
+        {
+            compare = H.CompareTo(nodeToCompare.H);
+        }
+        return -compare;
     }
 }

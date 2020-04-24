@@ -39,6 +39,7 @@ public class Generate : MonoBehaviour
         {
             if(!Spawner.InstanceExist)
                 Spawner.InstanceCreator(MeshGenerator.HeightMap, MapGenerator.MapSize, MapGenerator.MapSize, MapGenerator.Regions);
+           
             Spawner.Instance.ResetMapAray();
             Spawner.Instance.TestSpawn();
         }

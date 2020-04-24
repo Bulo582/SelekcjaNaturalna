@@ -36,6 +36,7 @@ public class SpawnEditor : Editor
                 Spawner.Instance.DeleteFoxes();
                 Spawner.Instance.DeleteRabbits();
                 Spawner.Instance.DeleteTree();
+
             }
             catch(NullReferenceException)
             {
@@ -52,6 +53,7 @@ public class SpawnEditor : Editor
                 Spawner.Instance.DeleteFoxes();
                 Spawner.Instance.DeleteRabbits();
                 Spawner.Instance.DeleteTree();
+                Destroy(GameObject.Find("Environment").GetComponent<Spawner>());
             }
         }
     }

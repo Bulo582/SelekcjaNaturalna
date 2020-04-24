@@ -47,8 +47,14 @@ public class Movement : MonoBehaviour // Iteration Module
     public RabbitIteraionInfo RII;
     internal RabbitLife rabbitLife;
     MapToTxt MapToTXTprinter;
+
+    // Pathfinding module
+    Transform target;
+    List<Node> path;
+    Pathfinding pf;
     void Start()
     {
+        pf = GetComponent<Pathfinding>();
         dietIteration = StartRabbit.Manager.iterationToDie;
         MapToTXTprinter = new MapToTxt(this.gameObject.name);
         fow = GetComponent<FieldOfView>();
@@ -94,7 +100,7 @@ public class Movement : MonoBehaviour // Iteration Module
         if (canMakeWay)
         {
             if (HaveTarget)
-                RandomMove();
+                ToTargetMove();
             else
                 RandomMove();
         }

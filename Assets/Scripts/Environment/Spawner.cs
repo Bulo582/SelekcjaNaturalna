@@ -6,6 +6,10 @@ using static MapGenerator;
 
 public class Spawner : MonoBehaviour
 {
+    private bool initialized = false;
+    public bool Initialized => initialized;
+
+
     GameObject rabbitPrefab;
     GameObject carrotPrefab;
     GameObject foxPrefab;
@@ -56,10 +60,9 @@ public class Spawner : MonoBehaviour
 
     public static void InstanceCreator(float[,] noiseMap, int heightMap, int widthMap, TerrainType[] regions)
     {
-        if (_instance == null)
+        _instance = GameObject.Find("Environment").GetComponent<Spawner>();
+        if (!_instance.Initialized)
         {
-            // _instance = new Spawner(noiseMap, heightMap, widthMap, regions);
-            _instance = GameObject.Find("Environment").AddComponent<Spawner>();
             _instance.Initialize(noiseMap, heightMap, widthMap, regions);
         }
         else
@@ -75,14 +78,8 @@ public class Spawner : MonoBehaviour
 
     private void Initialize(float[,] noiseMap, int heightMap, int widthMap, TerrainType[] regions)
     {
-        familyRabbit = new FamilyRabbit[Generate.sv.familyRabbits.Length];
-        for (int i = 0; i < Generate.sv.familyRabbits.Length; i++)
-        {
-            familyRabbit[i].startPop = Generate.sv.familyRabbits[i].startPop;
-            familyRabbit[i].familyID = Generate.sv.familyRabbits[i].familyID;
-            familyRabbit[i].familyName = Generate.sv.familyRabbits[i].familyName;
-            familyRabbit[i].color = Generate.sv.familyRabbits[i].color;
-        }
+        initialized = true;
+        RabbitFamilyInitialize();
         this.halfWidthMap = (widthMap - 2) / -2;
         this.halfHeightMap = (heightMap - 2) / 2;
         this.regions = regions;
@@ -93,6 +90,28 @@ public class Spawner : MonoBehaviour
         carrotPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/CarrotSpawn.prefab", typeof(GameObject));
         foxPrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/Fox.prefab", typeof(GameObject));
         treePrefab = (GameObject)AssetDatabase.LoadAssetAtPath("Assets/Prefabs/Tree.prefab", typeof(GameObject));
+    }
+
+    void RabbitFamilyInitialize()
+    {
+        if (familyRabbit == null)
+        {
+            familyRabbit = new FamilyRabbit[Generate.sv.familyRabbits.Length];
+            for (int i = 0; i < Generate.sv.familyRabbits.Length; i++)
+            {
+                familyRabbit[i].startPop = Generate.sv.familyRabbits[i].startPop;
+                familyRabbit[i].familyID = Generate.sv.familyRabbits[i].familyID;
+                familyRabbit[i].familyName = Generate.sv.familyRabbits[i].familyName;
+                familyRabbit[i].color = Generate.sv.familyRabbits[i].color;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < Generate.sv.familyRabbits.Length; i++)
+            {
+                familyRabbit[i].startPop = Generate.sv.familyRabbits[i].startPop;
+            }
+        }
     }
 
     public Vector3 GetLegalVector3(float y = 0.2f)
@@ -111,17 +130,24 @@ public class Spawner : MonoBehaviour
     #region Spawns
     public void TestSpawn() // testCase for specific seed of map
     {
+        DeleteCarrots();
+        DeleteRabbits();
         int rabbitFamilyIndex = 0;
         int rabbitX = 1;
         int rabbitY = 2;
+
+        Generate.generation++;
         GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + rabbitX, rabbitY, rabbitY - halfHeightMap), Quaternion.identity) as GameObject;
-        rabbit.name = "Rabbit" + rabbitFamilyIndex;
+        rabbit.GetComponent<RabbitLife>().FamilyRabbit = familyRabbit[rabbitFamilyIndex];
+        rabbit.name = $"Rabbit_{1}";
+        rabbit.GetComponent<RabbitLife>().rabbitID = 1;
+        rabbit.transform.parent = GameObject.Find("Rabbits").transform;
         rabbit.transform.parent = GameObject.Find("Rabbits").transform;
         generateMap[rabbitX, rabbitY] = 'R';
 
         int carrotX = 7;
         int carrotY = 3;
-        GameObject carriot = Instantiate(carrotPrefab, new Vector3(halfWidthMap + carrotX, rabbitY, carrotY - halfHeightMap), Quaternion.identity) as GameObject;
+        GameObject carriot = Instantiate(carrotPrefab, new Vector3(halfWidthMap + carrotX, carrotY, carrotY - halfHeightMap), Quaternion.identity) as GameObject;
         carriot.transform.parent = GameObject.Find("Carrots").transform;
         generateMap[carrotX, carrotY] = 'C';
     }
@@ -178,9 +204,12 @@ public class Spawner : MonoBehaviour
                 antyInfinityLoop = 100;
             }
             if (generated >= count)
+            {
+                RabbitFamilyInitialize();
                 break;
+            }
         }
-        rabbitFamilyIndex = 0;
+        
         //Debug
         //ArrayToTxt.ReadMapArray2D(generateMap);
     }

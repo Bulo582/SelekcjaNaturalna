@@ -4,7 +4,11 @@ using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
 {
-    public static int MapSize;
+    public static int MapSize { get; private set; }
+    public static int SurfaceArea
+    {
+        get { return MapSize * MapSize; }
+    }
     public static TerrainType[] Regions;
     public enum DrawMode
     {

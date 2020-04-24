@@ -30,10 +30,9 @@ public class FieldOfView : MonoBehaviour
         }
     }
 
-    void FindVisableTargets()
+    void FindVisableTargets() // nie widzi braci
     {
-        if (visibleTargets.Count == 0)
-        {
+
             visibleTargets.Clear();
             Collider[] targetInViewRadius = Physics.OverlapSphere(transform.position, viewRadious, targetMask);
 
@@ -47,12 +46,11 @@ public class FieldOfView : MonoBehaviour
                     if (!Physics.Raycast(transform.position, dirToTarget, dstToTarget, obstacleMask))
                     {
                         visibleTargets.Add(target);
-                        break;
                     }
                 }
             }
-            //visibleTargets = visibleTargets.OrderBy(target => Vector3.Distance(transform.position, target.transform.position)).ToList();
-        }
+            visibleTargets = visibleTargets.OrderBy(target => Vector3.Distance(transform.position, target.transform.position)).ToList();
+        
     }
 
 

@@ -17,6 +17,9 @@ public class GameSettingsEditor : Editor
                 gameSet.SetDoTXT();
                 gameSet.SetDebugMode();
                 gameSet.SetLoggerMode();
+                gameSet.SetRTSCam();
+                gameSet.SetFreeLookCam();
+                gameSet.SetAroundCam();
             }
         }
     }

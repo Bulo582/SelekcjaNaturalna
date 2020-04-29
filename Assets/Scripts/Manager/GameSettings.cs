@@ -4,13 +4,22 @@ using UnityEngine;
 
 public class GameSettings : MonoBehaviour
 {
+    CameraAround ca;
+    FreeLookCamera flc;
+    RTSCamera rtsc;
+
     [Range(0, 10)]
     public float timeSpeed = 1;
-    public bool DoTXT = true;
 
+    [Header("DebugModes")]
+    public bool DoTXT = true;
     public bool debugMode = true;
     public bool loggerMode = false;
 
+    [Header("Cameras")]
+    public bool aroundCamera = true;
+    public bool RTS_Camera = false;
+    public bool freeLookCamera = false;
     public bool autoUpdate
     {
         get { return true; }
@@ -19,6 +28,9 @@ public class GameSettings : MonoBehaviour
     {
         SetTime();
         SetDebugMode();
+        ca = GameObject.Find("CameraManager").GetComponent<CameraAround>();
+        rtsc = GameObject.Find("CameraManager").GetComponent<RTSCamera>();
+        flc = GameObject.Find("CameraManager").GetComponent<FreeLookCamera>();
     }
     private void Awake()
     {
@@ -27,6 +39,22 @@ public class GameSettings : MonoBehaviour
         DeleteAllTestFile();
         DeleteAllTestFolders();
     }
+
+    public void SetAroundCam()
+    {
+        ca.isRun = aroundCamera;
+    }
+
+    public void SetRTSCam()
+    {
+        rtsc.isRun = RTS_Camera;
+    }
+
+    public void SetFreeLookCam()
+    {
+        flc.isRun = freeLookCamera;
+    }
+
     public void SetTime()
     {
         Time.timeScale = timeSpeed;
@@ -51,5 +79,24 @@ public class GameSettings : MonoBehaviour
     public void DeleteAllTestFolders()
     {
         FileHelper.DeleteAllFolders(FileHelper.testFolder);
+    }
+
+    private void OnValidate()
+    {
+       if(aroundCamera)
+        {
+            RTS_Camera = false;
+            freeLookCamera = false;
+        }
+       if(RTS_Camera)
+        {
+            freeLookCamera = false;
+            aroundCamera = false;
+        }
+       if(freeLookCamera)
+        {
+            RTS_Camera = false;
+            aroundCamera = false;
+        }
     }
 }

@@ -27,16 +27,16 @@ public class Movement : MonoBehaviour // Iteration Module
     internal bool canMakeWay;
     DirMove dirMove;
 
-    // Var needed for die system
+    // Var for needed for die 
     int dietIteration;
     public int IterationWithoutEat = 0;
 
-    // Var needed if rabbits exist
+    // Var needed if rabbits exist move
     float movementTime = 2f;
     float movementCooldownIncrease = 5f;
     float currentMovementCooldown = 0;
 
-    // Var needed for operation of (genetated map == array map)
+    // Var for needed for operation of (genetated map == array map)
     int arrayPozX;
     int arrayPozY;
     char[,] accesArea;

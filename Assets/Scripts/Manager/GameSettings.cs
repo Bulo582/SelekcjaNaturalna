@@ -31,6 +31,9 @@ public class GameSettings : MonoBehaviour
         ca = GameObject.Find("CameraManager").GetComponent<CameraAround>();
         rtsc = GameObject.Find("CameraManager").GetComponent<RTSCamera>();
         flc = GameObject.Find("CameraManager").GetComponent<FreeLookCamera>();
+        SetAroundCam();
+        SetRTSCam();
+        SetFreeLookCam();
     }
     private void Awake()
     {

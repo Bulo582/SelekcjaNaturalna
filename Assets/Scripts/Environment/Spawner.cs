@@ -151,9 +151,10 @@ public class Spawner : MonoBehaviour
         carriot.transform.parent = GameObject.Find("Carrots").transform;
         generateMap[carrotX, carrotY] = 'C';
     }
-    public void SpawnChildOfRabbit(int x, int y, FamilyRabbit familyRabbit)
+    public void SpawnChildOfRabbit(int x, int y, FamilyRabbit familyRabbit, RabbitLife parent)
     {
         GameObject rabbit = Instantiate(rabbitPrefab, new Vector3(halfWidthMap + x, rabbitY, y - halfHeightMap), Quaternion.identity) as GameObject;
+        rabbit.GetComponent<RabbitLife>().Parent = parent;
         rabbit.GetComponent<RabbitLife>().FamilyRabbit = familyRabbit;
         rabbit.GetComponent<RabbitLife>().rabbitID = ++Generate.rabbitPopSum;
         rabbit.name = $"Rabbit_{++Generate.generation}";

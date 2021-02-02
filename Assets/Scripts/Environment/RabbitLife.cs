@@ -6,13 +6,15 @@ using UnityEngine;
 
 public class RabbitLife : MonoBehaviour
 {
-    public int rabbitID; // identify rabbit in Iteration Module ..// this variable getting of value from meth. NumeringPopulation()
+    public RabbitLife Parent;
+    public int rabbitID; // identify rabbit in Iteration Module ..// this variable getting value from method: NumeringPopulation()
     internal Spawner.FamilyRabbit FamilyRabbit; // membership of group...
     string Name; // name of current rabbit
     int reproductionPoint; // count carrot to division
     int Hunger; // counter that how eaten carrot before divison
-    public int Eaten = 0; // sum carrots which the rabbit eaten in whole our life 
+    public int Eaten = 0; // sum carrots which the rabbit eaten in whole own life 
     // prefer add here IterationOfObject
+    public int IterationToDie;
 
     int arrayPosX;
     int arrayPosY;
@@ -29,6 +31,9 @@ public class RabbitLife : MonoBehaviour
         Name = this.gameObject.name;
         this.gameObject.GetComponent<Renderer>().material.color = FamilyRabbit.color;
         reproductionPoint = StartRabbit.Manager.hunger;
+        IterationToDie = StartRabbit.Manager.iterationToDie;
+        if (Parent != null)
+            IterationToDie = Parent.IterationToDie + 1;
     }
     public void Meal()
     {
@@ -37,7 +42,7 @@ public class RabbitLife : MonoBehaviour
         FamilyIterationInfo.Instance.NextMealOfObject(FamilyRabbit.familyID);
 
         if (Hunger >= reproductionPoint)
-            Division();
+            Division(IterationToDie);
     }
     /// <summary>
     /// returns random, possible to acces way
@@ -144,9 +149,9 @@ public class RabbitLife : MonoBehaviour
         }
     }
     /// <summary>
-    /// Born new little sweet rabbit. TakeFreeWay and CoordinateChange must be call before.
+    /// Born new little sweet rabbit. TakeFreeWay and CoordinateChange must be call before. And increment iteration to die on the new generation.
     /// </summary>
-    public void Division()
+    public void Division(int iterationToDie)
      {
         Hunger = 0;
         arrayPosX = MapHelper.TransormX_ToMapX(this.transform.position.x);
@@ -154,11 +159,12 @@ public class RabbitLife : MonoBehaviour
         TakeFreeWay(arrayPosX, arrayPosY, out Way way);
         CoordinateChange(ref arrayPosX, ref arrayPosY, way);
         StartCoroutine("WaitForLastPerson");
+        
     }
     IEnumerator WaitForLastPerson()
     {
         yield return new WaitWhile(() => PopulationController.IsReady() == true);
-        Spawner.Instance.SpawnChildOfRabbit(arrayPosX, arrayPosY, FamilyRabbit);
+        Spawner.Instance.SpawnChildOfRabbit(arrayPosX, arrayPosY, FamilyRabbit, this);
         FamilyIterationInfo.Instance.NewRabbit(FamilyRabbit.familyID);
         if (Generate.freeFields == Generate.rabbitPopSum - 1)
         {

@@ -3,27 +3,27 @@ Symulacja ekosystemu
 
 ## Implemented:
 
-**-A* Pathfinding 
+**-A* Pathfinding**
 
-**-Object filed of view
+**-Object filed of view**
 
-**-Procedural world generation
+**-Procedural world generation**
 
-**-Simultaneous Movement System
+**-Simultaneous Movement System**
 
-**-Family System
+**-Family System**
 
-**-Spawner System
+**-Spawner System**
 
-**-Cameras System
+**-Cameras System**
 
-**-Debug/Log System
+**-Debug/Log System**
 
 
 ## To implement :
 
-**-Genetic System
+**-Genetic System**
 
-**-Diagram Preview System
+**-Diagram Preview System**
 
-**-Summary Simulation System
+**-Summary Simulation System**

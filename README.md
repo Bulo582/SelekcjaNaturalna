@@ -3,7 +3,7 @@ Symulacja ekosystemu
 
 ## Implemented:
 
-**-A* Pathfinding**
+-A* Pathfinding
 
 **-Object filed of view**
 
